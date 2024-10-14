@@ -1,0 +1,1 @@
+create database {name:ident} with template "PROJECT_NAME";

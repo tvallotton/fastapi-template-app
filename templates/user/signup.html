@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="grid grid-cols-2 h-full">
+
+
+    <div class="bg-slate-100 h-full">
+        <h2 class="font-medium text-xl m-2">PROJECT_NAME</h2>
+        <h1 class="font-medium text-2xl mt-8 text-center">
+            Welcome to PROJECT_NAME.
+            Sign up
+        </h1>
+
+        <div class="flex justify-center w-full">
+            <form action="/user/signup" method="post" class="w-[300px] py-2">
+                <div class="flex flex-col py-2">
+                    <label for="email-input" class="py-2">Email</label>
+                    <input id="email-input" name="email" type="email" class="form-input" placeholder="example@email.com">
+                    <input type="text" name="next" id="next" hidden value="{{next}}">
+                    {% if error %}
+                    <p class="text-red-500 text-sm">*{{error}}</p>
+                    {% endif %}
+                </div>
+                <button type="submit" class="btn w-full">Sign up</button>
+
+                <div class="text-gray-600 text-sm py-2">Already have an account? <a href="/user/login" class="link">Log
+                        in here</a></div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enlace de verificación</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans">
+    <meta name="color-scheme" content="light">
+    <meta name="supported-color-schemes" content="light">
+
+    <style type="text/css">
+        @import url("https://fonts.googleapis.com/css?family=Open+Sans");
+        @import url("https://fonts.googleapis.com/css?family=Roboto");
+
+        .rounded {
+            border-radius: 0.25rem;
+            border-width: 1px;
+        }
+
+        * {
+            font-family: Roboto, "Open Sans", Arial, Arial, Helvetica, sans-serif !important;
+        }
+
+        .flex {
+            flex: 1 1 0%;
+        }
+
+        .justify-center {
+            justify-content: center;
+        }
+
+        .border {
+            border: solid;
+            border-width: 1px;
+            border-color: lightgray;
+        }
+
+        .btn {
+            font-size: 20px;
+            /* margin: auto; */
+            font-weight: 900;
+            background-color: rgb(37 99 235);
+            color: white !important;
+            padding: 0.625rem;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background-color: rgb(37 99 235);
+        }
+
+        .link {
+            font-weight: bolder;
+            color: #007FFF;
+            text-decoration: none;
+        }
+
+        .link:hover {
+            color: #0063c5;
+        }
+    </style>
+
+
+</head>
+
+<body>
+    <div class="flex justify-center">
+        <div class="rounded border padding"
+            style="padding: 30px;margin:auto;margin-top: 30px; max-width: 500px; text-align: justify; text-justify: inter-word;">
+            <h3>PROJECT_NAME</h3>
+            <h1>Verifica tu dirección de correo electrónico</h1>
+            <hr>
+            <p>
+                <a class="link" style="font-family: 'Open Sans';">PROJECT_NAME</a> ha recibido una solicutud para crear una
+                cuenta asociada
+                a este correo electrónico.
+                <br>
+                <br>
+                Haz click en el siguiente botón para verificar tu correo:
+            </p>
+            <div style="text-align: center;padding-top: 10px;padding-bottom: 10px;">
+                <a id="verify-link" class="rounded btn" href="{{link}}">
+                    Verificar mi correo
+                </a>
+            </div>
+
+            <p>
+                Este enlace caducará en una hora.
+                <br><br>
+                Si no has sido tú, puedes ignorar este correo electrónico.
+            </p>
+
+        </div>
+        <div style="max-width: 500px;margin: auto; text-align: center;">
+            <span style="color:gray;font-size: 11px;">© 2023 PROJECT_NAME, [PostalCode], [Address]</span>
+        </div>
+    </div>
+</body>
+
+
+</html>

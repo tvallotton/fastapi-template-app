@@ -1,0 +1,26 @@
+services:
+  postgres:
+    container_name: PROJECT_NAME-postgres
+    image: postgres
+    restart: always
+    shm_size: 128mb
+    ports:
+      - 5436:5432
+    environment:
+      POSTGRES_DB: PROJECT_NAME
+      POSTGRES_PASSWORD: password
+
+  mailpit:
+    image: axllent/mailpit
+    container_name: PROJECT_NAME-mailpit
+    volumes:
+      - /data
+    ports:
+      - 8026:8025
+      - 1026:1025
+    environment:
+      MP_MAX_MESSAGES: 200
+      MP_MAX_AGE: 24h
+      MP_DATABASE: /data/mailpit.db
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1

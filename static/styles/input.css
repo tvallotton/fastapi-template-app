@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer components {
+    .btn {
+        @apply rounded text-sm font-bold p-2 transition-colors duration-300 shadow disabled:bg-gray-300 bg-blue-600 hover:bg-blue-700 text-white
+    }
+
+    .btn-secondary {
+        @apply rounded text-sm font-bold p-2 transition-colors duration-300 shadow disabled:bg-gray-300 bg-gray-50 text-black hover:bg-gray-200
+    }
+
+    .link {
+        @apply text-blue-600 hover:text-blue-800 visited:text-purple-600 hover:underline
+    }
+
+    .form-input {
+        @apply p-2 border-2 bg-white rounded w-full
+    }
+}

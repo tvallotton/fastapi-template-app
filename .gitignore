@@ -1,0 +1,4 @@
+.venv
+**/**cache*
+static/styles/output.css
+pyrightconfig.json
