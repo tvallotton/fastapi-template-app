@@ -22,13 +22,13 @@ end;
 $$
 language plpgsql;
 
-create function drop_history_table(base_table text) returns void as 
+create or replace function drop_history_table(base_table text) returns void as 
 $$
 declare 
     table_name text := FORMAT('%I', base_table || '_history');
 begin
+    execute 'drop trigger if exists ' || table_name  ||' on ' || base_table;
     execute 'drop table ' || table_name;
-    execute 'drop trigger ' || table_name;
 end;
 $$
 language plpgsql;
