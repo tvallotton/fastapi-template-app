@@ -1,9 +1,9 @@
 import os
-
 from contextlib import asynccontextmanager
 from pathlib import Path
 from string import Formatter
 from typing import Annotated
+
 import asyncpg
 from asyncpg.protocol import Record
 from fastapi import Depends, Request
@@ -22,14 +22,14 @@ for file in Path(".").glob("sql/**/*.sql"):
         queries[str(file)[4:-4]] = f.read()
 
 
-async def connection(request: Request):
+async def get_pg_connection(request: Request):
     pool = request.app.state.db_pool
     async with pool.acquire() as cnn:
         yield cnn
 
 
 class Connection:
-    def __init__(self, cnn: Annotated[asyncpg.Connection, Depends(connection)]):
+    def __init__(self, cnn: Annotated[asyncpg.Connection, Depends(get_pg_connection)]):
         self.inline = cnn
         self.formatter = SQLFormatter()
 

@@ -1,6 +1,6 @@
 import src.database as db
 from src.database.models import BaseModel
-from src.database.service import Connection, connection
+from src.database.service import Connection, get_pg_connection
 
 pytest_plugins = ("pytest_asyncio",)
 

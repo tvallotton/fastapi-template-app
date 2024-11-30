@@ -2,3 +2,4 @@
 **/**cache*
 static/styles/output.css
 pyrightconfig.json
+.DS_Store
