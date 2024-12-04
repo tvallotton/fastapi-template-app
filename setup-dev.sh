@@ -7,6 +7,7 @@ if ! test -d .venv; then
     source .venv/bin/activate
     
     pip install -r requirements.txt
+    pip install -r requirements-dev.txt
 else 
     source .venv/bin/activate
 fi
@@ -16,6 +17,6 @@ fi
 docker compose up -d
 source .env
 
-sqlx database setup --database-url $TEST_DATABASE_URL
-sqlx database setup --database-url $DATABASE_URL
+sqlx database reset --database-url $TEST_DATABASE_URL -y
+sqlx database reset --database-url $DATABASE_URL -y
 

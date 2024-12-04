@@ -1,0 +1,1 @@
+delete from storage where id = {id};

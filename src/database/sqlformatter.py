@@ -25,7 +25,12 @@ class SQLFormatter(Formatter):
     def escape_value(self, expr):
         if isinstance(expr, list):
             return self.escape_array(expr)
+        if isinstance(expr, bytes):
+            return self.escape_bytes(expr)
         return escape_expr(expr)
+
+    def escape_bytes(self, bytes: bytes):
+        return f"'\\x{bytes.hex()}'"
 
     def escape_array(self, array: list[str]):
         values = ",".join(map(escape_expr, array))

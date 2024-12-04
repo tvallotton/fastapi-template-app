@@ -1,3 +1,5 @@
+aioboto3==13.2.0
+aiobotocore==2.15.2
 aiosmtplib==3.0.2
 annotated-types==0.7.0
 anyio==4.6.2.post1

@@ -24,3 +24,15 @@ services:
       MP_DATABASE: /data/mailpit.db
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
+  localstack:
+    container_name: "PROJECT_NAME-s3"
+    image: localstack/localstack:s3-latest
+    ports:
+      - "127.0.0.1:4566:4566"
+    environment:
+      - DEBUG=${DEBUG:-0}
+      - ENFORCE_IAM=0
+    volumes:
+      - ".s3/volume:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - ".s3/init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh"
