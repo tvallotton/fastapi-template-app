@@ -15,11 +15,13 @@ def storage_service(cnn):
     return StorageService(cnn=cnn)
 
 
+@pytest.mark.filterwarnings("ignore:datetime.datetime.utcnow")
 async def test_upload(storage_service: StorageService):
     buffer = io.BytesIO(b"hello world")
     await storage_service.upload("test", buffer)
 
 
+@pytest.mark.filterwarnings("ignore:datetime.datetime.utcnow")
 async def test_upload_duplicate(storage_service: StorageService):
     buffer = io.BytesIO(b"duplicate buffer")
     await storage_service.upload("test", buffer)
@@ -27,6 +29,7 @@ async def test_upload_duplicate(storage_service: StorageService):
         await storage_service.upload("test", buffer)
 
 
+@pytest.mark.filterwarnings("ignore:datetime.datetime.utcnow")
 async def test_presigned_url(storage_service: StorageService):
     message = "presigned buffer"
     buffer = io.BytesIO(bytes(message, "utf-8"))
@@ -35,6 +38,7 @@ async def test_presigned_url(storage_service: StorageService):
     assert message in httpx.get(url).text
 
 
+@pytest.mark.filterwarnings("ignore:datetime.datetime.utcnow")
 async def test_delete(storage_service: StorageService):
     buffer = io.BytesIO(b"message to delete")
     storage = await storage_service.upload("test", buffer)
@@ -45,6 +49,7 @@ async def test_delete(storage_service: StorageService):
     assert httpx.get(url).status_code == 404
 
 
+@pytest.mark.filterwarnings("ignore:datetime.datetime.utcnow")
 async def test_has_references(storage_service: StorageService, cnn: Connection):
 
     await cnn.inline.execute(

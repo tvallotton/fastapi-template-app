@@ -1,17 +1,24 @@
 import os
 
 import httpx
+import pytest
 
 from src import mail
+from src.mail.service import MailService
 
 client = httpx.AsyncClient()
 
 MAILPIT_URL = os.environ["MAILPIT_URL"]
 
 
-async def test_send_email():
+@pytest.fixture()
+def mail_service():
+    return MailService()
+
+
+async def test_send_email(mail_service: MailService):
     dest = "email.service@test"
-    await mail.service.send("test", dest=dest, subject="greetings", context={})
+    await mail_service.send("test", dest=dest, subject="greetings", context={})
 
     response = await client.get(f"{MAILPIT_URL}/search", params={"query": dest})
 

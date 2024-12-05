@@ -1,7 +1,8 @@
-from dataclasses import dataclass
 import os
-import asyncpg
+from contextlib import asynccontextmanager
+from dataclasses import dataclass
 
+import asyncpg
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
@@ -14,6 +15,7 @@ class AppConfig:
     AUTORELOAD: bool = os.environ["ENV"] == "DEV"
 
 
+@asynccontextmanager
 async def setup_db(app: FastAPI):
     app.state.db_pool = await asyncpg.create_pool(app.state.config.DATABASE_URL)
     yield

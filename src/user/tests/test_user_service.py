@@ -1,16 +1,17 @@
-from pytest import fixture
 import pytest
+from fastapi import BackgroundTasks
+from pytest import fixture
+
 from src.database.service import Connection
+from src.mail.service import MailService
+from src.test_common import HTMLClient
 from src.user.model import User
 from src.user.service import UserService
-from fastapi import BackgroundTasks
-
-from src.test_common import HTMLClient
 
 
 @pytest.fixture()
 def user_service(cnn):
-    return UserService(cnn=cnn, tasks=BackgroundTasks())
+    return UserService(cnn=cnn, tasks=BackgroundTasks(), mail=MailService())
 
 
 async def test_user_doesnt_exist(user_service: UserService):

@@ -9,6 +9,7 @@ from asyncpg.protocol import Record
 from fastapi import Depends, Request
 from pydantic import BaseModel
 from pydantic.config import ConfigDict
+from pydantic.dataclasses import dataclass
 
 from src.database.sqlformatter import SQLFormatter
 

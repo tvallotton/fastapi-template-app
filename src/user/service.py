@@ -1,23 +1,27 @@
-from dataclasses import dataclass
+import os
 from datetime import UTC, datetime, timedelta
 from os import environ
-import os
 from typing import Annotated
-from fastapi import BackgroundTasks, Depends
 
 import jwt
+from fastapi import BackgroundTasks, Depends
+from pydantic import BaseModel, ConfigDict
+from pydantic.dataclasses import dataclass
 
 from src import mail
 from src.database import Connection
+from src.mail.service import MailService
 from src.user.model import User
 
 DOMAIN = environ["DOMAIN"]
 
 
-@dataclass
-class UserService:
+class UserService(BaseModel):
     cnn: Connection
     tasks: BackgroundTasks
+    mail: MailService
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     async def user_exists(self, email: str):
         user = await User.find_one(self.cnn, email=email.lower())
@@ -26,7 +30,7 @@ class UserService:
     async def send_access_link(self, email: str, next: str):
         token = self._create_token({"email": email}, timedelta(hours=1))
         context = {"link": f"{DOMAIN}/user/access?token={token}&next={next}"}
-        self.tasks.add_task(mail.service.send, "signup", email, "Access link", context)
+        self.tasks.add_task(self.mail.send, "signup", email, "Access link", context)
 
     async def verify_token(self, token: str):
         payload = jwt.decode(token, os.environ["JWT_SECRET_KEY"], algorithms=["HS256"])

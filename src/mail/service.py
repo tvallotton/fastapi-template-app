@@ -1,9 +1,12 @@
 import ssl
+from dataclasses import dataclass
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from os import environ
+from typing import Annotated
 
 from dotenv import load_dotenv
+from fastapi import Depends
 
 load_dotenv(".env.development")
 import aiosmtplib
@@ -24,17 +27,23 @@ server = aiosmtplib.SMTP(
 )
 
 
-async def send(template: str, dest: str, subject: str, context: dict = {}):
-    src = environ["SMTP_USER"]
-    message = MIMEMultipart("alternative")
-    message["From"] = src
-    message["To"] = dest
-    message["Subject"] = subject
+@dataclass
+class MailService:
 
-    html = templates.get_template(f"email/{template}.html").render(context)
-    html = MIMEText(html, "html")
+    async def send(self, template: str, dest: str, subject: str, context: dict = {}):
+        src = environ["SMTP_USER"]
+        message = MIMEMultipart("alternative")
+        message["From"] = src
+        message["To"] = dest
+        message["Subject"] = subject
 
-    message.attach(html)
+        html = templates.get_template(f"email/{template}.html").render(context)
+        html = MIMEText(html, "html")
 
-    async with server:
-        return await server.sendmail(src, dest, message.as_bytes())
+        message.attach(html)
+
+        async with server:
+            return await server.sendmail(src, dest, message.as_bytes())
+
+
+MailService = Annotated[MailService, Depends(MailService)]
