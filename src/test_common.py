@@ -1,14 +1,11 @@
 import os
+
 import httpx
-from bs4 import BeautifulSoup, element
-from fastapi.applications import FastAPI
+from bs4 import BeautifulSoup
 from fastapi.testclient import TestClient
 from pydantic import BaseModel, ConfigDict
 
-
 MAILPIT_URL = os.environ["MAILPIT_URL"]
-
-from src import app
 
 
 class HTMLClient(BaseModel):

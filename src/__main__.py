@@ -1,10 +1,10 @@
 import os
-from contextlib import asynccontextmanager
 from dataclasses import dataclass
 
-import asyncpg
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+
+from src import database
 
 from . import autoreload, home, user
 
@@ -15,16 +15,10 @@ class AppConfig:
     AUTORELOAD: bool = os.environ["ENV"] == "DEV"
 
 
-@asynccontextmanager
-async def setup_db(app: FastAPI):
-    app.state.db_pool = await asyncpg.create_pool(app.state.config.DATABASE_URL)
-    yield
-    await app.state.db_pool.close()
-
-
 def create_app(config: AppConfig = AppConfig()) -> FastAPI:
 
-    app = FastAPI(lifespan=setup_db)
+    app = FastAPI(lifespan=database.lifespan.setup_database)
+
     app.state.config = config
 
     app.include_router(home.routes.router)
@@ -38,4 +32,7 @@ def create_app(config: AppConfig = AppConfig()) -> FastAPI:
     return app
 
 
-app = create_app()
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(create_app(), port=int(os.environ["PORT"]))
