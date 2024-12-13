@@ -1,5 +1,5 @@
 from src.database.models import BaseModel
-from src.database import Connection
+from src.database.service import Connection
 
 
 class User(BaseModel):
@@ -10,8 +10,8 @@ class User(BaseModel):
         self.email = self.email.lower()
 
     @classmethod
-    def fake(cls, cnn: Connection, **data):
+    async def fake(cls, cnn: Connection, **data):
         from src.faker import fake
 
         data.setdefault("email", fake.unique.ascii_email())
-        return super(User, cls).fake(cnn, **data)
+        return await super(User, cls).fake(cnn, **data)

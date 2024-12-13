@@ -9,7 +9,7 @@ from pydantic import BaseModel, ConfigDict
 from pydantic.dataclasses import dataclass
 
 from src import mail
-from src.database import Connection
+from src.database.service import Connection
 from src.mail.service import MailService
 from src.user.model import User
 
