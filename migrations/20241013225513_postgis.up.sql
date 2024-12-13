@@ -1,2 +1,2 @@
 -- Add migration script here
-CREATE EXTENSION Postgis;
+CREATE EXTENSION postgis;
