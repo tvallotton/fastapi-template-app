@@ -21,7 +21,7 @@ class BaseModel(pydantic.BaseModel):
 
     @classmethod
     async def find(cls, cnn: Connection, path=None, **where):
-        records = await cnn.fetchrow(path or f"{cls.model_dir()}/find", **where)
+        records = await cnn.fetch(path or f"{cls.model_dir()}/find", **where)
         return [cls(**record) for record in records]
 
     async def delete(self, cnn: Connection):

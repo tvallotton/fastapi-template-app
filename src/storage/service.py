@@ -65,7 +65,7 @@ class StorageService:
         """
         Returns weather there are any foreign key references to this record.
         """
-        foreign_keys = await self.cnn.fetch("database/foreign-keys-to", table="storage")
+        foreign_keys = await self.cnn.fetch("database/foreign_keys_to", table="storage")
 
         for foreign_key in foreign_keys:
             count = await self.cnn.fetchrow(

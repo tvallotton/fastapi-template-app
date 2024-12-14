@@ -38,9 +38,9 @@ class Connection:
         query = self.formatter.format(queries[path], *args, **kwargs)
         return self.inline.fetch(query)
 
-    def fetchrow(self, path: str, *args, **kwargs) -> Record:
+    async def fetchrow(self, path: str, *args, **kwargs) -> Record:
         query = self.formatter.format(queries[path], *args, **kwargs)
-        return self.inline.fetchrow(query)
+        return await self.inline.fetchrow(query)
 
     def execute(self, path: str, *args, **kwargs):
         query = self.formatter.format(queries[path], *args, **kwargs)

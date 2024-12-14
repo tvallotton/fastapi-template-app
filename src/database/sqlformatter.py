@@ -20,6 +20,9 @@ class SQLFormatter(Formatter):
             case "ident":
                 value = escape_ident(value)
 
+            case "raw":
+                return super().format_field(value, "")
+
         return super().format_field(value, "")
 
     def escape_value(self, expr):
