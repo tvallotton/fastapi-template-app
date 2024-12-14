@@ -5,7 +5,7 @@ from pytest import fixture
 from src.database.service import Connection
 from src.mail.service import MailService
 from src.test_common import HTMLClient
-from src.user.model import User
+from src.user.models import User
 from src.user.service import UserService
 
 

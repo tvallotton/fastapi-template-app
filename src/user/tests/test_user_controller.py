@@ -1,9 +1,6 @@
 from src.test_common import HTMLClient
 
 
-pytest_plugins = ("pytest_asyncio",)
-
-
 def test_signup(client: HTMLClient, email="signup@test.email"):
     client.goto("/user/signup")
     client.write("input", email)

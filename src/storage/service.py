@@ -33,7 +33,7 @@ class StorageService:
             )
 
     async def upload(self, bucket, file: IOBase) -> Storage:
-        async with self.cnn.inline.transaction():
+        async with self.cnn.cnn.transaction():
 
             sha1 = self.sha1(file)
             storage = Storage(bucket=bucket, sha1=sha1)
@@ -45,7 +45,7 @@ class StorageService:
             return storage
 
     async def delete(self, storage: Storage):
-        async with self.cnn.inline.transaction():
+        async with self.cnn.cnn.transaction():
             await storage.delete(self.cnn)
             async with session.client("s3", endpoint_url=endpoint_url) as s3:
                 await s3.delete_object(Bucket=storage.bucket, Key=storage.id.hex)

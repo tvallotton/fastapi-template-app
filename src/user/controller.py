@@ -1,15 +1,16 @@
-from email import header
 import os
+from email import header
 from typing import Annotated
-from src.database.service import Connection
-from src.user.forms import LoginForm
+
 import jwt
 from fastapi import APIRouter, BackgroundTasks, Form, Request
 from fastapi.responses import RedirectResponse
 
+from src.database.service import Connection
 from src.templating.service import render
 from src.user import service
-from src.user.model import User
+from src.user.forms import LoginForm
+from src.user.models import User
 from src.user.service import UserService
 from src.utils import redirect
 

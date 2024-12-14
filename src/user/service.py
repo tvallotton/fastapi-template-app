@@ -11,7 +11,7 @@ from pydantic.dataclasses import dataclass
 from src import mail
 from src.database.service import Connection
 from src.mail.service import MailService
-from src.user.model import User
+from src.user.models import User
 
 DOMAIN = environ["DOMAIN"]
 

@@ -31,31 +31,31 @@ async def get_pg_connection(request: Request):
 
 class Connection:
     def __init__(self, cnn: Annotated[asyncpg.Connection, Depends(get_pg_connection)]):
-        self.inline = cnn
+        self.cnn = cnn
         self.formatter = SQLFormatter()
 
     def fetch(self, path: str, *args, **kwargs):
         query = self.formatter.format(queries[path], *args, **kwargs)
-        return self.inline.fetch(query)
+        return self.cnn.fetch(query)
 
     def fetchrow(self, path: str, *args, **kwargs) -> Record:
         query = self.formatter.format(queries[path], *args, **kwargs)
-        return self.inline.fetchrow(query)
+        return self.cnn.fetchrow(query)
 
     def execute(self, path: str, *args, **kwargs):
         query = self.formatter.format(queries[path], *args, **kwargs)
-        return self.inline.execute(query)
+        return self.cnn.execute(query)
 
     def cursor(self, path: str, *args, **kwargs):
         query = self.formatter.format(queries[path], *args, **kwargs)
-        return self.inline.cursor(query)
+        return self.cnn.cursor(query)
 
     def rollback(self):
-        return self.inline.execute("rollback")
+        return self.cnn.execute("rollback")
 
     async def fetch_with_colnames(self, path: str, *args, **kwargs):
         query = self.formatter.format(queries[path], *args, **kwargs)
-        data = await self.inline.fetch(query)
+        data = await self.cnn.fetch(query)
         columns = await self.column_names(data, query)
         return FetchWithColNames(rows=data, columns=columns)
 
@@ -63,7 +63,7 @@ class Connection:
         if len(data) != 0:
             return list(data[0].keys())
 
-        stmt = await self.inline.prepare(query)
+        stmt = await self.cnn.prepare(query)
         return [attr.name for attr in stmt.get_attributes()]
 
 

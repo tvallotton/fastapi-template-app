@@ -1,6 +1,4 @@
-from src.user.model import User
-
-pytest_plugins = ("pytest_asyncio",)
+from src.user.models import User
 
 
 async def test_user_save(cnn, email="user@save.test"):

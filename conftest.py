@@ -1,21 +1,18 @@
-import asyncio
 import os
-import time
 from urllib.parse import urlparse, urlunparse
 from uuid import uuid4
 
 import asyncpg
-import httpx
 import pytest
 import pytest_asyncio
 from dotenv import load_dotenv
-from pytest_asyncio import is_async_test
 from fastapi.testclient import TestClient
-from src import database
-from src.database.service import Connection
-from src.main import AppConfig, create_app
-from src.test_common import HTMLClient
+from pytest_asyncio import is_async_test
 
+from src import database
+from src.__main__ import AppConfig, create_app
+from src.database.service import Connection
+from src.test_common import HTMLClient
 
 load_dotenv(".env.development")
 pytest_plugins = ["pytest_asyncio"]
@@ -61,7 +58,7 @@ async def test_database_url(request):
 @pytest_asyncio.fixture(loop_scope="session")
 async def cnn(test_database_url):
     cnn = await asyncpg.connect(test_database_url)
-    yield Connection(cnn)
+    yield Connection(cnn=cnn)
     await cnn.close()
 
 

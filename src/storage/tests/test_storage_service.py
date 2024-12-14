@@ -6,7 +6,7 @@ from asyncpg import UniqueViolationError
 from fastapi import UploadFile
 
 from src import storage
-from src.database import Connection
+from src.database.service import Connection
 from src.storage.service import StorageService
 
 
@@ -52,7 +52,7 @@ async def test_delete(storage_service: StorageService):
 @pytest.mark.filterwarnings("ignore:datetime.datetime.utcnow")
 async def test_has_references(storage_service: StorageService, cnn: Connection):
 
-    await cnn.inline.execute(
+    await cnn.cnn.execute(
         """
         create table if not exists testing_table_storage_fk  (
             id uuid primary key default gen_random_uuid(), 

@@ -4,9 +4,7 @@ from dataclasses import dataclass
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from src import database
-
-from . import autoreload, home, user
+from . import autoreload, database, home, user
 
 
 @dataclass(frozen=True)
@@ -21,8 +19,8 @@ def create_app(config: AppConfig = AppConfig()) -> FastAPI:
 
     app.state.config = config
 
-    app.include_router(home.routes.router)
-    app.include_router(user.routes.router)
+    app.include_router(home.controller.router)
+    app.include_router(user.controller.router)
 
     app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -35,4 +33,6 @@ def create_app(config: AppConfig = AppConfig()) -> FastAPI:
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(create_app(), port=int(os.environ["PORT"]))
+    uvicorn.run(
+        create_app(), port=int(os.environ["PORT"]), reload=os.environ["ENV"] == "DEV"
+    )
