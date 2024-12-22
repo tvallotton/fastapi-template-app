@@ -23,127 +23,148 @@ def mkfile(filename, output):
         f.write(output)
 
 
-controller = (
-    lambda prefix: f"""
-from fastapi import APIRouter
+# controller = (
+#     lambda prefix: f"""
+# from fastapi import APIRouter
 
 
-router = APIRouter(prefix=\"{prefix}\")\n
-"""
-)
+# router = APIRouter(prefix=\"{prefix}\")\n
+# """
+# )
 
-models = (
-    lambda classname: f"""
-from src.database.models import BaseModel
-
-
-class {classname}(BaseModel):
-    pass
-"""
-)
-
-service = (
-    lambda classname: f"""
-from pydantic import BaseModel
-
-from src.database.service import Connection
+# models = (
+#     lambda classname: f"""
+# from src.database.models import BaseModel
 
 
-class {classname}Service(BaseModel):
-    cnn: Connection
-"""
-)
+# class {classname}(BaseModel):
+#     pass
+# """
+# )
+
+# service = (
+#     lambda classname: f"""
+# from pydantic import BaseModel
+
+# from src.database.service import Connection
 
 
-test_service = (
-    lambda classname: f"""
-import pytest
-
-@pytest.fixture()
-def storage_service(cnn):
-    return StorageService(cnn=cnn)
-    
-"""
-)
-
-test_models = (
-    lambda classname: f"""
-import pytest
+# class {classname}Service(BaseModel):
+#     cnn: Connection
+# """
+# )
 
 
-"""
-)
+# test_service = (
+#     lambda classname: f"""
+# import pytest
+
+# @pytest.fixture()
+# def storage_service(cnn):
+#     return StorageService(cnn=cnn)
+
+# """
+# )
+
+# test_models = (
+#     lambda classname: f"""
+# import pytest
+
+
+# """
+# )
 
 
 class ScaffoldOptions(BaseModel):
     snake_case: str
     models: bool
     controller: bool
+    forms: bool
     service: bool
-    
 
     @property
     def pascal_case(self):
         return "".join(x.capitalize() for x in self.snake_case.lower().split("_"))
-    
 
     @staticmethod
     def from_args():
         assert len(sys.argv) >= 2, "Excepted at least 1 argument"
+        crud = "crud" in sys.argv[1:]
         return ScaffoldOptions(
             snake_case=sys.argv[1],
-            models="models" in sys.argv[1:],
-            controller="controller" in sys.argv[1:],
-            service="service" in sys.argv[1:],
-            templates="templates" in sys.argv[1:],
+            models=crud or "models" in sys.argv[1:],
+            controller=crud or "controller" in sys.argv[1:],
+            service=crud or "service" in sys.argv[1:],
+            templates=crud or "templates" in sys.argv[1:],
+            forms=crud or "forms" in sys.argv[1:],
         )
 
 
 class ScaffoldCreator(BaseModel):
-    opts: ScaffoldOptions
+    opt: ScaffoldOptions
     schema_service: SchemaService
 
     def scaffold(self):
         self.create_base_dir()
         self.create_init()
-        
+
         if self.opt.controller:
             self.create_controller()
-        if self.service:
+        if self.opt.service:
             self.create_service()
-        if self.models:
+        if self.opt.models:
             self.create_models()
-            
-        
-    
+            self.create_queries()
+        if self.opt.forms:
+            self.create_forms()
+
+    def create_forms():
+        pass
+
     def create_base_dir(self):
         mkdir(f"./src/{self.snake_case}")
         mkdir(f"./src/{self.snake_case}/tests")
-        
-    
+
     async def create_models(self):
+        snake_case = self.opt.snake_case
         models = (
             "from src.database.models import BaseModel\n\n"
             f"class {self.pascal_case}(BaseModel):\n"
-            f"    {}"
+            f"    {self.get_model_fields()}"
         )
-        mkdir(f"./src/{self.snake_case}/models.py", )
-        
 
+        mkfile(f"./src/{snake_case}/models.py", models)
+
+    async def get_model_fields(self):
+        
+        columns = await self.schema_service.get_column_info(
+            self.opt.snake_case
+        )
     
-    
+        yield "    \n".join(
+            f"{key}: {info.python_type.__name__}" 
+            for key, info in columns.items():
+            if key != "id
+        )
+            
+            
+     
+
     def create_empty_controller(self):
         controller = (
             f"from fastapi import APIRouter\n\n"
-            f"router = APIRouter(prefix=\"{self.snake_case}\")"
+            f'router = APIRouter(prefix="{self.snake_case}")'
         )
+
         mkfile(f"./src/{self.snake_case}/controller.py", controller)
-        
-        
+
     def create_init(self):
         imports = ",".join(self._init_imports())
-        mkfile(f"./src/{self.snake_case}/__init__.py", imports and f"from . import {imports}")
-        
+        mkfile(
+            f"./src/{self.snake_case}/__init__.py",
+            imports and f"from . import {imports}",
+        )
+
     def _init_imports(self):
         if self.service:
             yield "service"
@@ -151,15 +172,13 @@ class ScaffoldCreator(BaseModel):
             yield "controller"
         if self.templates:
             yield "models"
-    
-    
 
 
 if __name__ == "__main__":
 
     options = ScaffoldOptions.from_args()
-
-    mkdir(f"./src/{snake_case}")
+    print(options)
+    # mkdir(f"./src/{options.snake_case}")
 
     # mkfile(f"./src/{snake_case}/controller.py", controller(snake_case))
     # mkfile(f"./src/{snake_case}/models.py", models(pascal_case))

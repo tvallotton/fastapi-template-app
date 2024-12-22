@@ -9,7 +9,7 @@ from src.database.service import Connection
 
 
 class BaseModel(pydantic.BaseModel):
-    id: UUID = Field(default_factory=lambda: uuid4(), alias="id")
+    id: UUID = Field(default_factory=uuid4)
     valid_since: datetime | None = None
     valid_until: datetime | None = None
 
