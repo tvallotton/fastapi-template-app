@@ -17,6 +17,6 @@ class SchemaService(BaseModel):
         record = await self.cnn.fetchrow("schema/has_history", table_name=table_name)
         return record["count"] != 0
 
-    async def get_column_info(self, table_name):
+    async def get_column_info(self, table_name) -> dict[str, ColumnInfo]:
         columns = await self.cnn.fetch("schema/get_column_info", table_name=table_name)
         return {column["column_name"]: ColumnInfo(**column) for column in columns}
