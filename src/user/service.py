@@ -9,6 +9,7 @@ from pydantic import BaseModel, ConfigDict
 from pydantic.dataclasses import dataclass
 
 from src import mail
+from src.database.repository import Repository
 from src.database.service import Connection
 from src.mail.service import MailService
 from src.user.models import User
@@ -17,14 +18,14 @@ DOMAIN = environ["DOMAIN"]
 
 
 class UserService(BaseModel):
-    cnn: Connection
+    repository: Repository[User]
     tasks: BackgroundTasks
     mail: MailService
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     async def user_exists(self, email: str):
-        user = await User.find_one(self.cnn, email=email.lower())
+        user = await self.repository.find(email=email.lower())
         return user is not None
 
     async def send_access_link(self, email: str, next: str):
@@ -39,7 +40,7 @@ class UserService(BaseModel):
 
         if user is None:
             user = User(**payload)
-            await user.save(self.cnn)
+            await self.repository.save(self.cnn)
 
         return self.create_token(user)
 

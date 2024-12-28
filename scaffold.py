@@ -131,6 +131,11 @@ class ScaffoldForms(BaseModel):
     columns: dict[str, ColumnInfo]
 
 
+class ScaffoldService(BaseModel):
+    opt: ScaffoldOptions
+    columns: dict[str, ColumnInfo]
+
+
 class ScaffoldCreator(BaseModel):
     opt: ScaffoldOptions
     schema_service: SchemaService

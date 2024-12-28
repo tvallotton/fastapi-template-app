@@ -1,20 +1,13 @@
-import os
-from contextlib import asynccontextmanager
 from pathlib import Path
-from string import Formatter
 from typing import Annotated
 
 import asyncpg
 from asyncpg.protocol import Record
 from fastapi import Depends, Request
-from pydantic import BaseModel
-from pydantic.config import ConfigDict
-from pydantic.dataclasses import dataclass
 
 from src.database.sqlformatter import SQLFormatter
 
 pg: asyncpg.Pool | None = None  # type: ignore
-
 
 queries = {}
 
@@ -53,12 +46,6 @@ class Connection:
     def rollback(self):
         return self.cnn.execute("rollback")
 
-    async def fetch_with_colnames(self, path: str, *args, **kwargs):
-        query = self.formatter.format(queries[path], *args, **kwargs)
-        data = await self.cnn.fetch(query)
-        columns = await self.column_names(data, query)
-        return FetchWithColNames(rows=data, columns=columns)
-
     async def column_names(self, data: list, query: str):
         if len(data) != 0:
             return list(data[0].keys())
@@ -68,10 +55,3 @@ class Connection:
 
 
 Connection = Annotated[Connection, Depends(Connection)]
-
-
-class FetchWithColNames(BaseModel):
-    rows: list[Record]
-    columns: list[str]
-
-    model_config = ConfigDict(arbitrary_types_allowed=True)

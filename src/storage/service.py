@@ -5,7 +5,9 @@ from uuid import UUID
 
 import aioboto3
 from fastapi import UploadFile
+from pydantic import BaseModel
 
+from src.database.repository import Repository
 from src.database.service import Connection
 from src.storage.models import Storage
 
@@ -19,9 +21,8 @@ endpoint_url = os.environ.get("AWS_S3_ENDPOINT_URL")
 BUF_SIZE = 8 * 1028
 
 
-class StorageService:
-    def __init__(self, cnn: Connection):
-        self.cnn = cnn
+class StorageService(BaseModel):
+    repository: Repository[Storage]
 
     async def presigned_url(self, storage: Storage):
         async with session.client("s3", endpoint_url=endpoint_url) as s3:
@@ -37,7 +38,7 @@ class StorageService:
 
             sha1 = self.sha1(file)
             storage = Storage(bucket=bucket, sha1=sha1)
-            await storage.save(self.cnn)
+            await self.repository.save(storage)
 
             async with session.client("s3", endpoint_url=endpoint_url) as s3:
                 await s3.upload_fileobj(file, bucket, storage.id.hex)
@@ -46,7 +47,7 @@ class StorageService:
 
     async def delete(self, storage: Storage):
         async with self.cnn.cnn.transaction():
-            await storage.delete(self.cnn)
+            await self.repository.delete(storage.id)
             async with session.client("s3", endpoint_url=endpoint_url) as s3:
                 await s3.delete_object(Bucket=storage.bucket, Key=storage.id.hex)
 
@@ -60,18 +61,3 @@ class StorageService:
             sha1.update(data)
         file.seek(0)
         return sha1.digest()
-
-    async def has_references(self, id: UUID):
-        """
-        Returns weather there are any foreign key references to this record.
-        """
-        foreign_keys = await self.cnn.fetch("database/foreign-keys-to", table="storage")
-
-        for foreign_key in foreign_keys:
-            count = await self.cnn.fetchrow(
-                "storage/count-references", id=id, **foreign_key
-            )
-
-            if count["count"] != 0:
-                return True
-        return False

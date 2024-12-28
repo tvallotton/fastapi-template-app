@@ -28,18 +28,6 @@ def pytest_collection_modifyitems(items):
         async_test.add_marker(session_scope_marker, append=False)
 
 
-# @pytest.fixture(scope="session", autouse=True)
-# def clear_mailpit(request):
-#     pass
-
-#     def finalizer():
-#         httpx.delete(f"{MAILPIT_URL}/messages")
-
-#     httpx.delete(f"{MAILPIT_URL}/messages")
-
-#     request.addfinalizer(finalizer)
-
-
 @pytest_asyncio.fixture(loop_scope="session", scope="session", autouse=False)
 async def test_database_url(request):
     name = f"test_{uuid4()}"

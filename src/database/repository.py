@@ -1,0 +1,66 @@
+import re
+from datetime import datetime
+from uuid import UUID, uuid4
+
+from pydantic import BaseModel, ConfigDict
+
+from src.database.service import Connection
+
+
+class Repository[T: BaseModel](BaseModel):
+    cnn: Connection
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    async def find_one(self, path=None, **where) -> T | None:
+        record = await self.cnn.fetchrow(path or f"{self.model_dir}/find_one", **where)
+        if record is not None:
+            return self.model_type(**record)
+
+    async def find(self, path=None, **where) -> list[T]:
+        records = await self.cnn.fetchrow(path or f"{self.model_dir}/find", **where)
+        return [self.model_type(**record) for record in records]
+
+    async def delete(self, id: str | UUID):
+        dir = self.model_dir
+        await self.cnn.execute(f"{dir}/delete", id=id)
+
+    async def save(self, model: T, path=None) -> T:
+        dir = self.model_dir
+        record = await self.cnn.fetchrow(path or f"{dir}/save", **model.model_dump())
+        return self.model_type(**record)
+
+    @property
+    def model_type(self):
+        return self.__orig_class__.__args__[0]
+
+    @property
+    def model_dir(self):
+        return self.table_name
+
+    @property
+    def table_name(self):
+        name = self.model_type.__name__
+        return re.sub(r"(?<!^)(?=[A-Z])", "_", name).lower()
+
+    async def fake(self, **data):
+        from src.faker import fake
+
+        for field, info in self.model_type.model_fields.items():
+            type = info.annotation
+            if field in data:
+                continue
+            if type == str:
+                data[field] = fake.text(max_nb_chars=100)
+            elif type == int:
+                data[field] = fake.random_int()
+            elif type == float:
+                data[field] = fake.pyfloat()
+            elif type == datetime:
+                data[field] = fake.date_time_this_year()
+            elif type == UUID:
+                data[field] = uuid4()
+
+        record = self.model_type(**data)
+        await self.save(record)
+        return record

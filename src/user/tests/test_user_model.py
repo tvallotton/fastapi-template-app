@@ -1,31 +1,39 @@
+import pytest
+
+from conftest import pytest_collection_modifyitems
+from src.database.repository import Repository
 from src.user.models import User
 
 
-async def test_user_save(cnn, email="user@save.test"):
-    user = await User(email=email).save(cnn)
+@pytest.fixture(scope="function")
+async def repository(cnn):
+    return Repository[User](cnn=cnn)
+
+
+async def test_user_save(repository, email="user@save.test"):
+    user = await repository.save(User(email=email))
     assert user is not None
     return user
 
 
-async def test_find_user(cnn):
-
+async def test_find_user(repository: Repository[User]):
     email = "user@find.test"
-    user = await test_user_save(cnn, email)
+    user = await test_user_save(repository, email)
 
-    user2 = await User.find_one(cnn, email=email)
+    user2 = await repository.find_one(email=email)
 
     assert user2 is not None
     assert user2.id == user.id
 
-    await user.delete(cnn)
+    await repository.delete(user.id)
 
-    user3 = await User.find_one(cnn, email=email)
+    user3 = await repository.find_one(email=email)
     assert user3 is None
 
 
-async def test_delete_user(cnn):
+async def test_delete_user(repository: Repository[User]):
     email = "user@delete.test"
 
-    user = await test_user_save(cnn, email)
-    await user.delete(cnn)
-    assert not await User.find_one(cnn, email=email)
+    user = await test_user_save(repository, email)
+    await repository.delete(user.id)
+    assert not await repository.find_one(email=email)
