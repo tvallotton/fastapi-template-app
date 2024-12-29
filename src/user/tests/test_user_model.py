@@ -6,8 +6,8 @@ from src.user.models import User
 
 
 @pytest.fixture(scope="function")
-async def repository(cnn):
-    return Repository[User](cnn=cnn)
+def repository(cnn):
+    return Repository(model_type=User, cnn=cnn)
 
 
 async def test_user_save(repository, email="user@save.test"):

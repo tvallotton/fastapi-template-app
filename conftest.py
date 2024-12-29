@@ -9,8 +9,8 @@ from dotenv import load_dotenv
 from fastapi.testclient import TestClient
 from pytest_asyncio import is_async_test
 
-from src import database
-from src.__main__ import AppConfig, create_app
+from src import AppConfig, create_app, database
+from src.database.repository import Repository
 from src.database.service import Connection
 from src.test_common import HTMLClient
 
@@ -26,6 +26,18 @@ def pytest_collection_modifyitems(items):
     session_scope_marker = pytest.mark.asyncio(loop_scope="session")
     for async_test in pytest_asyncio_tests:
         async_test.add_marker(session_scope_marker, append=False)
+
+
+# @pytest.fixture(scope="session", autouse=True)
+# def clear_mailpit(request):
+#     pass
+
+#     def finalizer():
+#         httpx.delete(f"{MAILPIT_URL}/messages")
+
+#     httpx.delete(f"{MAILPIT_URL}/messages")
+
+#     request.addfinalizer(finalizer)
 
 
 @pytest_asyncio.fixture(loop_scope="session", scope="session", autouse=False)
@@ -48,6 +60,11 @@ async def cnn(test_database_url):
     cnn = await asyncpg.connect(test_database_url)
     yield Connection(cnn=cnn)
     await cnn.close()
+
+
+@pytest_asyncio.fixture(loop_scope="session")
+def repository(cnn):
+    return lambda model: Repository[model](cnn)
 
 
 @pytest.fixture(scope="function")

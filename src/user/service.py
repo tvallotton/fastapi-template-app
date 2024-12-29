@@ -25,7 +25,7 @@ class UserService(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     async def user_exists(self, email: str):
-        user = await self.repository.find(email=email.lower())
+        user = await self.repository.find_one(email=email.lower())
         return user is not None
 
     async def send_access_link(self, email: str, next: str):
@@ -36,11 +36,11 @@ class UserService(BaseModel):
     async def verify_token(self, token: str):
         payload = jwt.decode(token, os.environ["JWT_SECRET_KEY"], algorithms=["HS256"])
 
-        user = await User.find_one(self.cnn, email=payload["email"])
+        user = await self.repository.find_one(email=payload["email"])
 
         if user is None:
             user = User(**payload)
-            await self.repository.save(self.cnn)
+            await self.repository.save(user)
 
         return self.create_token(user)
 

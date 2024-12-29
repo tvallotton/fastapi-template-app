@@ -1,16 +1,29 @@
 import re
+import typing
+from ast import TypeVar
+from csv import Error
 from datetime import datetime
+from typing import Annotated, Any, NewType
 from uuid import UUID, uuid4
 
+from fastapi import Depends
 from pydantic import BaseModel, ConfigDict
 
 from src.database.service import Connection
 
 
-class Repository[T: BaseModel](BaseModel):
+class Repository[T](BaseModel):
     cnn: Connection
+    model_type: Any
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    def __class_getitem__(self, model_type):
+
+        def get_repository(cnn: Connection):
+            return Repository(cnn=cnn, model_type=model_type)
+
+        return Annotated[Repository, Depends(get_repository)]
 
     async def find_one(self, path=None, **where) -> T | None:
         record = await self.cnn.fetchrow(path or f"{self.model_dir}/find_one", **where)
@@ -30,9 +43,8 @@ class Repository[T: BaseModel](BaseModel):
         record = await self.cnn.fetchrow(path or f"{dir}/save", **model.model_dump())
         return self.model_type(**record)
 
-    @property
-    def model_type(self):
-        return self.__orig_class__.__args__[0]
+    def transaction(self):
+        return self.cnn.cnn.transaction()
 
     @property
     def model_dir(self):

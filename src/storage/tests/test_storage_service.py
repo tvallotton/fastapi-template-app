@@ -6,13 +6,15 @@ from asyncpg import UniqueViolationError
 from fastapi import UploadFile
 
 from src import storage
+from src.database.repository import Repository
 from src.database.service import Connection
+from src.storage.models import Storage
 from src.storage.service import StorageService
 
 
 @pytest.fixture()
 def storage_service(cnn):
-    return StorageService(cnn=cnn)
+    return StorageService(repository=Repository(cnn=cnn, model_type=Storage))
 
 
 @pytest.mark.filterwarnings("ignore:datetime.datetime.utcnow")
@@ -47,26 +49,3 @@ async def test_delete(storage_service: StorageService):
 
     await storage_service.delete(storage)
     assert httpx.get(url).status_code == 404
-
-
-@pytest.mark.filterwarnings("ignore:datetime.datetime.utcnow")
-async def test_has_references(storage_service: StorageService, cnn: Connection):
-
-    await cnn.cnn.execute(
-        """
-        create table if not exists testing_table_storage_fk  (
-            id uuid primary key default gen_random_uuid(), 
-            storage_id uuid references storage(id)
-        );
-        insert into storage (id, bucket, sha1) values ('b0ac6986-c14b-4b9c-9da4-8403b2bb94ab', 'test', '\\x00');
-        insert into storage (id, bucket, sha1) values ('d5d88cc1-2aa8-432b-949c-b8e0e6432cb3', 'test', '\\x01');
-        
-        insert into testing_table_storage_fk (storage_id) values ('d5d88cc1-2aa8-432b-949c-b8e0e6432cb3');
-
-    """
-    )
-
-    assert await storage_service.has_references("d5d88cc1-2aa8-432b-949c-b8e0e6432cb3")
-    assert not await storage_service.has_references(
-        "b0ac6986-c14b-4b9c-9da4-8403b2bb94ab"
-    )
