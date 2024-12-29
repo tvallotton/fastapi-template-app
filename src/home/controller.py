@@ -1,7 +1,4 @@
-from uuid import uuid4
-
-from fastapi import APIRouter, Depends, Request
-from fastapi.responses import RedirectResponse
+from fastapi import APIRouter, Request
 
 from src.templating.service import render
 from src.user.dependencies import UserGuard

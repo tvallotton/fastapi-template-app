@@ -28,16 +28,15 @@ def pytest_collection_modifyitems(items):
         async_test.add_marker(session_scope_marker, append=False)
 
 
-# @pytest.fixture(scope="session", autouse=True)
-# def clear_mailpit(request):
-#     pass
+@pytest.fixture(scope="session", autouse=True)
+def clear_mailpit(request):
 
-#     def finalizer():
-#         httpx.delete(f"{MAILPIT_URL}/messages")
+    def finalizer():
+        httpx.delete(f"{MAILPIT_URL}/messages")
 
-#     httpx.delete(f"{MAILPIT_URL}/messages")
+    httpx.delete(f"{MAILPIT_URL}/messages")
 
-#     request.addfinalizer(finalizer)
+    request.addfinalizer(finalizer)
 
 
 @pytest_asyncio.fixture(loop_scope="session", scope="session", autouse=False)

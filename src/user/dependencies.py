@@ -11,11 +11,16 @@ from pydantic import UUID4, BaseModel, Field
 JWT_SECRET_KEY = environ["JWT_SECRET_KEY"]
 
 
-def authorization(r: Request):
+class Token(BaseModel):
+    user_id: uuid.UUID
+    is_admin: bool
+
+
+def authenticate(r: Request):
     if r.method == "GET" and r.cookies.get("auth"):
         value = r.cookies.get("auth")
         try:
-            return Token(**jwt.decode(value, JWT_SECRET_KEY, algorithms="HS256"))  # type: ignore
+            return Token(**jwt.decode(value, JWT_SECRET_KEY, algorithms="HS256"))
         except:
             pass
 
@@ -29,13 +34,13 @@ def authorization(r: Request):
         return
 
     try:
-        return Token(**jwt.decode(match[1], JWT_SECRET_KEY, algorithms=["HS256"]))  # type: ignore
+        return Token(**jwt.decode(match[1], JWT_SECRET_KEY, algorithms=["HS256"]))
     except:
         return
 
 
-def auth_or_redirect(r: Request):
-    token = authorization(r)
+def authenticate_or_redirect(r: Request):
+    token = authenticate(r)
     if token is None:
         raise HTTPException(
             status_code=303, headers={"Location": f"/user/login?next={r.url.path}"}
@@ -43,10 +48,12 @@ def auth_or_redirect(r: Request):
     return token
 
 
-class Token(BaseModel):
-    user_id: uuid.UUID
-    is_admin: bool
+def admin_user(r: Request):
+    user = authenticate_or_redirect(r)
+    if not user.is_admin:
+        raise HTTPException(status_code=403)
 
 
-UserGuard = Annotated[Token, Depends(auth_or_redirect)]
-OptionalUserGuard = Annotated[Token | None, Depends(authorization)]
+OptionalUserGuard = Annotated[Token | None, Depends(authenticate)]
+UserGuard = Annotated[Token, Depends(authenticate_or_redirect)]
+AdminUserGuard = Annotated[Token, Depends(admin_user)]
