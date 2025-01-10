@@ -13,7 +13,7 @@ RUN npx --yes tailwindcss -i ./static/styles/input.css -o ./static/styles/output
 #############################
 ###      SHARED IMAGE     ###
 #############################
-FROM python:3.11.8 as shared
+FROM python:3.12.8 as prod
 WORKDIR /home/app
 
 
@@ -29,15 +29,9 @@ COPY . .
 COPY --from=build /usr/local/cargo/bin/sqlx /usr/local/bin/sqlx
 RUN pip3 install -r requirements.txt
 
-
-#############################
-###       PROD IMAGE      ###
-#############################
-FROM shared as prod
-
 # Copy generated files
 COPY --from=build /home/app/static /home/app/static
 
 RUN useradd app
 
-CMD [ "./script/prod.sh" ]
+CMD [ "python3", "-m", "src", "prod" ]
