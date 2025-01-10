@@ -11,7 +11,7 @@ from . import autoreload, database, home, user
 @dataclass(frozen=True)
 class AppConfig:
     DATABASE_URL: str = os.environ["DATABASE_URL"]
-    AUTORELOAD: bool = os.environ["ENV"] == "DEV"
+    AUTORELOAD: bool = os.environ["ENV"] == "dev"
 
 
 def create_app(config: AppConfig = AppConfig()) -> FastAPI:

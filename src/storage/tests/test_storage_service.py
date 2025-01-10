@@ -13,8 +13,8 @@ from src.storage.service import StorageService
 
 
 @pytest.fixture()
-def storage_service(cnn):
-    return StorageService(repository=Repository(cnn=cnn, model_type=Storage))
+def storage_service(injector):
+    return injector.get(StorageService)
 
 
 @pytest.mark.filterwarnings("ignore:datetime.datetime.utcnow")

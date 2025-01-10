@@ -1,9 +1,11 @@
 import os
+from re import sub
 
 import httpx
 import pytest
 
 from src import mail
+from src.mail.dto import MailOptions
 from src.mail.service import MailService
 
 client = httpx.AsyncClient()
@@ -18,7 +20,14 @@ def mail_service():
 
 async def test_send_email(mail_service: MailService):
     dest = "email.service@test"
-    await mail_service.send("test", dest=dest, subject="greetings", context={})
+
+    opts = MailOptions(
+        template="test",
+        dest=dest,
+        subject="greetings",
+    )
+
+    await mail_service.send(opts)
 
     response = await client.get(f"{MAILPIT_URL}/search", params={"query": dest})
 

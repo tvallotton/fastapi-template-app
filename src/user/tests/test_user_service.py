@@ -11,12 +11,8 @@ from src.user.service import UserService
 
 
 @pytest.fixture()
-def user_service(cnn):
-    return UserService(
-        repository=Repository(cnn=cnn, model_type=User),
-        tasks=BackgroundTasks(),
-        mail=MailService(),
-    )
+def user_service(injector):
+    return injector.get(UserService)
 
 
 async def test_user_doesnt_exist(user_service: UserService):

@@ -1,3 +1,4 @@
+from copyreg import constructor
 from pathlib import Path
 from typing import Annotated
 
@@ -6,6 +7,7 @@ from asyncpg.protocol import Record
 from fastapi import Depends, Request
 
 from src.database.sqlformatter import SQLFormatter
+from src.utils import dependency
 
 pg: asyncpg.Pool | None = None  # type: ignore
 
@@ -22,6 +24,7 @@ async def get_pg_connection(request: Request):
         yield cnn
 
 
+@dependency()
 class Connection:
     def __init__(self, cnn: Annotated[asyncpg.Connection, Depends(get_pg_connection)]):
         self.cnn = cnn
@@ -52,6 +55,3 @@ class Connection:
 
         stmt = await self.cnn.prepare(query)
         return [attr.name for attr in stmt.get_attributes()]
-
-
-Connection = Annotated[Connection, Depends(Connection)]

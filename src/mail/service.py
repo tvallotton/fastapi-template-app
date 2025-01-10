@@ -3,16 +3,17 @@ from dataclasses import dataclass
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from os import environ
-from typing import Annotated
+from typing import Annotated, Unpack
 
+import aiosmtplib
 from dotenv import load_dotenv
 from fastapi import Depends
+from pydantic import BaseModel
 
-load_dotenv(".env.development")
-import aiosmtplib
-
+from src.mail.dto import MailOptions
 from src.templating import templates
 
+load_dotenv(".env.development")
 context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
 
 
@@ -26,24 +27,29 @@ server = aiosmtplib.SMTP(
     use_tls=environ["SMTP_USE_TLS"] == "true",
 )
 
+IS_SAFE = environ["SMTP_START_TLS"] == "true" or environ["SMTP_USE_TLS"] == "true"
 
-@dataclass
-class MailService:
+assert IS_SAFE or environ["ENV"] != "prod"
 
-    async def send(self, template: str, dest: str, subject: str, context: dict = {}):
-        src = environ["SMTP_USER"]
+
+class MailService(BaseModel):
+
+    async def send(self, opts: MailOptions):
+        src = opts.src or environ["SMTP_USER"]
         message = MIMEMultipart("alternative")
         message["From"] = src
-        message["To"] = dest
-        message["Subject"] = subject
+        message["To"] = opts.dest
+        message["Subject"] = opts.subject
 
-        html = templates.get_template(f"email/{template}.html").render(context)
+        html = templates.get_template(f"email/{opts.template}.html").render(
+            opts.context
+        )
         html = MIMEText(html, "html")
 
         message.attach(html)
 
         async with server:
-            return await server.sendmail(src, dest, message.as_bytes())
+            return await server.sendmail(src, opts.dest, message.as_bytes())
 
 
 MailService = Annotated[MailService, Depends(MailService)]

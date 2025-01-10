@@ -17,7 +17,4 @@ fi
 docker compose up -d
 source .env
 
-sqlx database reset --database-url $TEST_DATABASE_URL -y
-sqlx database reset --database-url $DATABASE_URL -y
-python seed.py
-
+python -m src database reset

@@ -11,6 +11,7 @@ from pydantic.dataclasses import dataclass
 from src import mail
 from src.database.repository import Repository
 from src.database.service import Connection
+from src.mail.dto import MailOptions
 from src.mail.service import MailService
 from src.user.models import User
 
@@ -31,7 +32,13 @@ class UserService(BaseModel):
     async def send_access_link(self, email: str, next: str):
         token = self._create_token({"email": email}, timedelta(hours=1))
         context = {"link": f"{DOMAIN}/user/access?token={token}&next={next}"}
-        self.tasks.add_task(self.mail.send, "signup", email, "Access link", context)
+        opts = MailOptions(
+            template="signup",
+            dest=email,
+            subject="Access link",
+            context=context,
+        )
+        self.tasks.add_task(self.mail.send, opts)
 
     async def verify_token(self, token: str):
         payload = jwt.decode(token, os.environ["JWT_SECRET_KEY"], algorithms=["HS256"])

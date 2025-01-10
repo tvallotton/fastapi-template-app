@@ -1,18 +1,24 @@
 import os
+from inspect import isclass
+from typing import Annotated, get_origin
 from urllib.parse import urlparse, urlunparse
 from uuid import uuid4
 
 import asyncpg
+import httpx
 import pytest
 import pytest_asyncio
+from attr import dataclass
 from dotenv import load_dotenv
 from fastapi.testclient import TestClient
+from pydantic import BaseModel, Field
 from pytest_asyncio import is_async_test
 
 from src import AppConfig, create_app, database
 from src.database.repository import Repository
 from src.database.service import Connection
 from src.test_common import HTMLClient
+from src.utils import Injector
 
 load_dotenv(".env.development")
 pytest_plugins = ["pytest_asyncio"]
@@ -61,11 +67,6 @@ async def cnn(test_database_url):
     await cnn.close()
 
 
-@pytest_asyncio.fixture(loop_scope="session")
-def repository(cnn):
-    return lambda model: Repository[model](cnn)
-
-
 @pytest.fixture(scope="function")
 def app(test_database_url):
     return create_app(AppConfig(DATABASE_URL=test_database_url))
@@ -76,3 +77,8 @@ def client(app):
     with TestClient(app) as client:
         print(app, client)
         yield HTMLClient(client=client)
+
+
+@pytest.fixture(scope="function")
+def injector(cnn):
+    return Injector(overrides={Connection: cnn})

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    
+
     <!-- Tailwind -->
     {% if ENV != "dev" %}
     <link rel="stylesheet" href="/static/styles/output.css/">
@@ -21,8 +21,7 @@
     <script src="/static/flowbite.js"></script>
 
     <!-- HTMX -->
-    <script src="/static/htmx.js" integrity="sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni"
-        crossorigin="anonymous"></script>
+    <script src="/static/htmx.js"></script>
 
     <script src="/static/authentication.js"></script>
 
@@ -33,17 +32,16 @@
 
 <body class="h-screen">
     {% block body %}{% endblock body %}
+
+    {% if ENV == "dev" %}
+    <!-- Autoreload -->
+    <script src="/static/ws.js"></script>
+    <div hx-ext="ws" ws-connect="/ws/autoreload">
+        <div id="ws-notifications"></div>
+    </div>
+    <!-- Reload styles in case they change -->
+    <link rel="stylesheet" href="/static/styles/output.css/?nonce={{uuid}}">
+    {% endif %}
 </body>
-
-
-{% if ENV == "dev" %}
-<!-- Autoreload -->
-<script src="/static/ws.js"></script>
-<div hx-ext="ws" ws-connect="/ws/autoreload">
-    <div id="ws-notifications"></div>
-</div>
-<!-- Reload styles in case they change -->
-<link rel="stylesheet" href="/static/styles/output.css/?nonce={{uuid}}">
-{% endif %}
 
 </html>
