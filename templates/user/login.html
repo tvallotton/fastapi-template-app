@@ -14,7 +14,8 @@
             <form action="/user/login" method="post" class="w-[300px] py-2">
                 <div class="flex flex-col py-2">
                     <label for="email-input" class="py-2">Email</label>
-                    <input id="email-input" name="email" type="email" class="form-input" placeholder="example@email.com">
+                    <input id="email-input" name="email" type="email" class="form-input"
+                        placeholder="example@email.com">
                     <input type="text" name="next" id="next" hidden value="{{next}}">
                     {% if error %}
                     <p class="text-red-500 text-sm">*{{error}}</p>
