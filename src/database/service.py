@@ -46,8 +46,13 @@ class Connection:
         query = self.formatter.format(queries[path], *args, **kwargs)
         return self.cnn.cursor(query)
 
-    def rollback(self):
-        return self.cnn.execute("rollback")
+    def rollback(self, savepoint: str):
+        query = self.formatter.format(queries["database/rollback"], savepoint=savepoint)
+        return self.cnn.execute(query)
+
+    def savepoint(self, name: str):
+        query = self.formatter.format(queries["database/savepoint"], savepoint=name)
+        return self.cnn.execute(query)
 
     async def column_names(self, data: list, query: str):
         if len(data) != 0:

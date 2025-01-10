@@ -18,7 +18,7 @@ def storage_service(injector):
 
 
 @pytest.mark.filterwarnings("ignore:datetime.datetime.utcnow")
-async def test_upload(storage_service: StorageService):
+async def test_upload_new(storage_service: StorageService):
     buffer = io.BytesIO(b"hello world")
     await storage_service.upload("test", buffer)
 
@@ -27,8 +27,15 @@ async def test_upload(storage_service: StorageService):
 async def test_upload_duplicate(storage_service: StorageService):
     buffer = io.BytesIO(b"duplicate buffer")
     await storage_service.upload("test", buffer)
-    with pytest.raises(UniqueViolationError):
+
+    async with storage_service.repository.transaction():
+        start = await storage_service.repository.count()
         await storage_service.upload("test", buffer)
+
+        end = await storage_service.repository.count()
+        assert (
+            start == end
+        ), "Duplicate control should prevent the file from being uploaded again"
 
 
 @pytest.mark.filterwarnings("ignore:datetime.datetime.utcnow")

@@ -9,6 +9,7 @@ from uuid import UUID, uuid4
 from fastapi import Depends
 from pydantic import BaseModel, ConfigDict
 
+from src.database.models import Savepoint
 from src.database.service import Connection
 
 
@@ -37,6 +38,19 @@ class Repository[T](BaseModel):
     async def delete(self, id: str | UUID):
         dir = self.model_dir
         await self.cnn.execute(f"{dir}/delete", id=id)
+
+    async def count(self) -> int:
+        dir = self.model_dir
+        row = await self.cnn.fetchrow(f"{dir}/count")
+        return row["count"]
+
+    async def savepoint(self) -> Savepoint:
+        savepoint = Savepoint()
+        await self.cnn.savepoint(savepoint.name)
+        return savepoint
+
+    def rollback(self, savepoint: Savepoint):
+        return self.cnn.rollback(savepoint.name)
 
     async def save(self, model: T, path=None) -> T:
         dir = self.model_dir

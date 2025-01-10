@@ -12,7 +12,10 @@ def redirect(path: str, status=200):
 
 def create_annotated_decorator(annotation):
     def decorator(*args, **kwargs):
-        return lambda item: Annotated[item, annotation(*args, **kwargs)]
+        def annotate[T](item: T) -> T:
+            return Annotated[item, annotation(*args, **kwargs)]
+
+        return annotate
 
     return decorator
 

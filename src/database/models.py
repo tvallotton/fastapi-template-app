@@ -64,3 +64,7 @@ class BaseModel(pydantic.BaseModel):
         record = cls(**data)
         await record.save(cnn)
         return record
+
+
+class Savepoint(BaseModel):
+    name: str = Field(default_factory=lambda: str(uuid4()))
