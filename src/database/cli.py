@@ -1,8 +1,6 @@
 import os
 
 import rich
-import typer
-from pytest import console_main
 from typer import Typer
 
 app = Typer(no_args_is_help=True)
