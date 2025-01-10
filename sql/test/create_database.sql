@@ -1,1 +1,1 @@
-create database {name:ident} with template "PROJECT_NAME";
+create database {name:ident} with template "fastapi-template-app";

@@ -1,6 +1,4 @@
 import os
-from inspect import isclass
-from typing import Annotated, get_origin
 from urllib.parse import urlparse, urlunparse
 from uuid import uuid4
 
@@ -8,14 +6,11 @@ import asyncpg
 import httpx
 import pytest
 import pytest_asyncio
-from attr import dataclass
 from dotenv import load_dotenv
 from fastapi.testclient import TestClient
-from pydantic import BaseModel, Field
 from pytest_asyncio import is_async_test
 
-from src import AppConfig, create_app, database
-from src.database.repository import Repository
+from src import AppConfig, create_app
 from src.database.service import Connection
 from src.test_common import HTMLClient
 from src.utils import Injector
