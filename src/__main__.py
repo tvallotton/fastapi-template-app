@@ -18,7 +18,7 @@ def prod():
     Runs the server in production mode.
     """
     os.environ["ENV"] == "prod"
-    uvicorn.run("src:app", port=int(os.environ["PORT"]))
+    uvicorn.run("src:app", host="0.0.0.0", port=int(os.environ["PORT"]))
 
 
 @app.command()

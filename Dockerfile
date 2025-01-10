@@ -11,11 +11,23 @@ COPY . .
 RUN npx --yes tailwindcss -i ./static/styles/input.css -o ./static/styles/output.css
 
 #############################
-###      SHARED IMAGE     ###
+###      POETRY IMAGE     ###
+#############################
+FROM python:3.12.8 as requirements
+WORKDIR /home/app
+RUN pip3 install pipx
+RUN pipx install poetry
+RUN /root/.local/bin/poetry self add poetry-plugin-export
+COPY ./pyproject.toml ./pyproject.toml
+COPY ./poetry.lock ./poetry.lock
+# Create the requirements.txt file
+RUN /root/.local/bin/poetry export --without-hashes > requirements.txt 
+
+#############################
+###      Prod IMAGE     ###
 #############################
 FROM python:3.12.8 as prod
 WORKDIR /home/app
-
 
 RUN apt-get update
 RUN apt-get install locales cron nginx -y
@@ -25,13 +37,18 @@ ENV LANG es_CL.UTF-8
 ENV LANGUAGE es_CL:es
 ENV LC_ALL es_CL.UTF-8
 COPY . .
+
 # Copy sqlx binary
 COPY --from=build /usr/local/cargo/bin/sqlx /usr/local/bin/sqlx
-RUN pip3 install -r requirements.txt
 
-# Copy generated files
+# Copy tailwindcss build
 COPY --from=build /home/app/static /home/app/static
+
+# Copy requirements.txt
+COPY --from=requirements /home/app/requirements.txt /home/app/requirements.txt
+
+RUN pip install -r requirements.txt
 
 RUN useradd app
 
-CMD [ "python3", "-m", "src", "prod" ]
+CMD [ "python", "-m", "src", "prod" ]
