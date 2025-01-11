@@ -28,7 +28,7 @@ class StorageService(BaseModel):
     repository: Repository[Storage]
 
     async def presigned_url(self, storage: Storage):
-        async with session.client("s3", endpoint_url=endpoint_url) as s3:
+        async with session.client("s3", endpoint_url=endpoint_url) as s3:  # type: ignore
             params = {"Bucket": storage.bucket, "Key": storage.id.hex}
             return await s3.generate_presigned_url(
                 "get_object",
@@ -46,24 +46,26 @@ class StorageService(BaseModel):
             try:
                 await self.repository.save(storage)
 
-                async with session.client("s3", endpoint_url=endpoint_url) as s3:
+                async with session.client("s3", endpoint_url=endpoint_url) as s3:  # type: ignore
                     await s3.upload_fileobj(file, bucket, storage.id.hex)
 
             except UniqueViolationError as e:
                 await self.repository.rollback(savepoint)
-                return await self.repository.find_one(
+                storage = await self.repository.find_one(
                     "storage/find_duplicate", storage=storage
                 )
+                assert storage is not None
+                return storage
 
             return storage
 
     async def delete(self, storage: Storage):
         async with self.repository.transaction():
             await self.repository.delete(storage.id)
-            async with session.client("s3", endpoint_url=endpoint_url) as s3:
+            async with session.client("s3", endpoint_url=endpoint_url) as s3:  # type: ignore
                 await s3.delete_object(Bucket=storage.bucket, Key=storage.id.hex)
 
-    def sha1(self, file: UploadFile) -> bytes:
+    def sha1(self, file: IOBase) -> bytes:
         file.seek(0)
         sha1 = hashlib.sha1()
         while True:

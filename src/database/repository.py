@@ -1,9 +1,6 @@
 import re
-import typing
-from ast import TypeVar
-from csv import Error
 from datetime import datetime
-from typing import Annotated, Any, NewType
+from typing import Annotated, Any
 from uuid import UUID, uuid4
 
 from fastapi import Depends
@@ -13,13 +10,13 @@ from src.database.models import Savepoint
 from src.database.service import Connection
 
 
-class Repository[T](BaseModel):
+class Repository[T: BaseModel](BaseModel):
     cnn: Connection
     table_class: Any
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    def __class_getitem__(self, model_type):
+    def __class_getitem__(cls, model_type):  # type: ignore
 
         def get_repository(cnn: Connection):
             return Repository(cnn=cnn, table_class=model_type)
@@ -42,6 +39,7 @@ class Repository[T](BaseModel):
     async def count(self) -> int:
         dir = self.model_dir
         row = await self.cnn.fetchrow(f"{dir}/count")
+        assert row is not None
         return row["count"]
 
     async def savepoint(self) -> Savepoint:

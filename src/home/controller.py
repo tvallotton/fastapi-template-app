@@ -1,3 +1,5 @@
+import traceback
+
 from fastapi import APIRouter, Request
 
 from src.templating.service import render

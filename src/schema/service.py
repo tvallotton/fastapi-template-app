@@ -20,14 +20,15 @@ class SchemaService(BaseModel):
 
     async def has_history(self, table_name: str):
         record = await self.cnn.fetchrow("schema/has_history", table_name=table_name)
+        assert record is not None
         return record["count"] != 0
 
-    async def get_column_info(self, table_name) -> dict[str, ColumnInfo] | None:
-        if not await self.table_exists(table_name=table_name):
-            return
+    async def get_column_info(self, table_name) -> dict[str, ColumnInfo]:
+        assert await self.table_exists(table_name=table_name)
         columns = await self.cnn.fetch("schema/get_column_info", table_name=table_name)
         return {column["column_name"]: ColumnInfo(**column) for column in columns}
 
     async def table_exists(self, table_name: str):
         record = await self.cnn.fetchrow("schema/table_exists", table_name=table_name)
+        assert record is not None
         return record["exists"]

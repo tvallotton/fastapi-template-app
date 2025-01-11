@@ -13,7 +13,7 @@ app = typer.Typer(no_args_is_help=True)
 
 async def get_service(service_type):
     cnn = await asyncpg.connect(os.environ["DATABASE_URL"])
-    return Injector(overrides={get_pg_connection: cnn}).get(service_type)
+    return Injector(overrides={get_pg_connection: lambda: cnn}).get(service_type)
 
 
 async def async_seed():

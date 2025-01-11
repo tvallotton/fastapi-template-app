@@ -14,10 +14,12 @@ from src.database.service import Connection
 from src.mail.dto import MailOptions
 from src.mail.service import MailService
 from src.user.models import User
+from src.utils import dependency
 
 DOMAIN = environ["DOMAIN"]
 
 
+@dependency()
 class UserService(BaseModel):
     repository: Repository[User]
     tasks: BackgroundTasks
@@ -59,6 +61,3 @@ class UserService(BaseModel):
     def _create_token(self, payload: dict, exp=timedelta(days=2)):
         payload["exp"] = datetime.now(UTC) + exp
         return jwt.encode(payload, environ["JWT_SECRET_KEY"], algorithm="HS256")
-
-
-UserService = Annotated[UserService, Depends()]

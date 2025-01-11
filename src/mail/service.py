@@ -12,6 +12,7 @@ from pydantic import BaseModel
 
 from src.mail.dto import MailOptions
 from src.templating import templates
+from src.utils import dependency
 
 load_dotenv(".env.development")
 context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
@@ -32,6 +33,7 @@ IS_SAFE = environ["SMTP_START_TLS"] == "true" or environ["SMTP_USE_TLS"] == "tru
 assert IS_SAFE or environ["ENV"] != "prod"
 
 
+@dependency()
 class MailService(BaseModel):
 
     async def send(self, opts: MailOptions):
@@ -49,7 +51,4 @@ class MailService(BaseModel):
         message.attach(html)
 
         async with server:
-            return await server.sendmail(src, opts.dest, message.as_bytes())
-
-
-MailService = Annotated[MailService, Depends(MailService)]
+            await server.sendmail(src, opts.dest, message.as_bytes())

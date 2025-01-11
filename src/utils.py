@@ -1,6 +1,6 @@
 from copyreg import constructor
-from inspect import isclass
-from typing import Annotated, Type, get_origin
+from inspect import isasyncgen, isclass
+from typing import Annotated, Callable, Type, get_origin
 
 from fastapi import Depends, Form, Path, Query, Response
 from pydantic import BaseModel, Field
@@ -13,7 +13,7 @@ def redirect(path: str, status=200):
 def create_annotated_decorator(annotation):
     def decorator(*args, **kwargs):
         def annotate[T](item: T) -> T:
-            return Annotated[item, annotation(*args, **kwargs)]
+            return Annotated[item, annotation(*args, **kwargs)]  # type: ignore
 
         return annotate
 
@@ -29,14 +29,14 @@ path = create_annotated_decorator(Path)
 class Injector(BaseModel):
 
     overrides: dict = Field(default_factory=dict)
-    cache: dict = Field(default_factory=dict)
+    cached: dict = Field(default_factory=dict)
 
-    def get(self, dependency):
-        if self.cache.get(dependency) is not None:
-            return self.cache[dependency]
+    def get[T](self, dependency: Type[T]) -> T:
+        if self.cached.get(dependency) is not None:
+            return self.cached[dependency]
 
         if self.overrides.get(dependency) is not None:
-            return self.overrides[dependency]
+            return self.get(self.overrides[dependency])
 
         if get_origin(dependency) == Annotated:
             return self.get_annotated(dependency)
@@ -60,7 +60,7 @@ class Injector(BaseModel):
         if isclass(dependency) and not issubclass(dependency, BaseModel):
             annotations = dependency.__init__.__annotations__
 
-        kwargs = {arg: self.get(_type) for arg, _type in annotations.items()}
+        kwargs = {arg: self.get(_type) for arg, _type in annotations.items()}  # type: ignore
 
-        self.cache[dependency] = dependency(**kwargs)
-        return self.cache[dependency]
+        self.cached[dependency] = dependency(**kwargs)
+        return self.cached[dependency]

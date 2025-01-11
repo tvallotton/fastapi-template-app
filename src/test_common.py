@@ -95,7 +95,7 @@ class HTMLClient(BaseModel):
         elif hx_post is not None:
             replace = self._post(hx_post)
         else:
-            raise NotImplemented()
+            raise NotImplementedError()
 
         query = get_attr(element, "hx-target")
 
@@ -116,7 +116,7 @@ class HTMLClient(BaseModel):
         self.doc = BeautifulSoup(html, features="html.parser")
 
     def text(self):
-        return self.doc.text()
+        return self.doc.text
 
 
 def search_by_email(query):

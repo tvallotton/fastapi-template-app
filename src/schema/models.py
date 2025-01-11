@@ -1,4 +1,6 @@
 from datetime import datetime
+from types import NotImplementedType
+from typing import Type
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -20,7 +22,7 @@ class ColumnInfo(BaseModel):
             case "uuid":
                 return UUID
             case "timeztamp" | "timestamp with timezone":
-                datetime
+                return datetime
             case "float" | "double precision":
                 return float
             case "integer" | "bigint" | "smallint":
@@ -29,3 +31,4 @@ class ColumnInfo(BaseModel):
                 return bool
             case "json":
                 return str
+        raise NotImplementedError()

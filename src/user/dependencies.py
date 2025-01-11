@@ -20,7 +20,8 @@ def authenticate(r: Request):
     if r.method == "GET" and r.cookies.get("auth"):
         value = r.cookies.get("auth")
         try:
-            return Token(**jwt.decode(value, JWT_SECRET_KEY, algorithms="HS256"))
+            if value:
+                return Token(**jwt.decode(value, JWT_SECRET_KEY, algorithms="HS256"))
         except:
             pass
 

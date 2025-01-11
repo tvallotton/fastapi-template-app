@@ -76,4 +76,4 @@ def client(app):
 
 @pytest.fixture(scope="function")
 def injector(cnn):
-    return Injector(overrides={Connection: cnn})
+    return Injector(overrides={Connection: lambda: cnn})

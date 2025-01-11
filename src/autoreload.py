@@ -1,12 +1,6 @@
 import asyncio
-import os
-import random
-import signal
-import sys
-from time import sleep
 
-from fastapi import APIRouter, FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.websockets import WebSocketState
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 router = APIRouter(
     prefix="/ws",

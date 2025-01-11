@@ -1,15 +1,11 @@
-from copyreg import constructor
 from pathlib import Path
 from typing import Annotated
 
 import asyncpg
-from asyncpg.protocol import Record
 from fastapi import Depends, Request
 
 from src.database.sqlformatter import SQLFormatter
 from src.utils import dependency
-
-pg: asyncpg.Pool | None = None  # type: ignore
 
 queries = {}
 
@@ -34,7 +30,7 @@ class Connection:
         query = self.formatter.format(queries[path], *args, **kwargs)
         return self.cnn.fetch(query)
 
-    def fetchrow(self, path: str, *args, **kwargs) -> Record:
+    def fetchrow(self, path: str, *args, **kwargs):
         query = self.formatter.format(queries[path], *args, **kwargs)
         return self.cnn.fetchrow(query)
 
