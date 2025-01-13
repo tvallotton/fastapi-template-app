@@ -6,13 +6,14 @@ from uuid import UUID, uuid4
 from fastapi import Depends
 from pydantic import BaseModel, ConfigDict
 
+from src.database import models
 from src.database.models import Savepoint
 from src.database.service import Connection
 
 
-class Repository[T: BaseModel](BaseModel):
+class Repository[T: models.BaseModel](BaseModel):
     cnn: Connection
-    table_class: Any
+    table_class: type[T]
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -53,6 +54,7 @@ class Repository[T: BaseModel](BaseModel):
     async def save(self, model: T, path=None) -> T:
         dir = self.model_dir
         record = await self.cnn.fetchrow(path or f"{dir}/save", **model.model_dump())
+        assert record is not None
         return self.table_class(**record)
 
     def transaction(self):
@@ -60,12 +62,11 @@ class Repository[T: BaseModel](BaseModel):
 
     @property
     def model_dir(self):
-        return self.table_name
+        return self.table_class.model_dir()
 
     @property
     def table_name(self):
-        name = self.table_class.__name__
-        return re.sub(r"(?<!^)(?=[A-Z])", "_", name).lower()
+        return self.table_class.table_name()
 
     async def fake(self, **data):
         from src.faker import fake

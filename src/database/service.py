@@ -14,8 +14,11 @@ for file in Path(".").glob("sql/**/*.sql"):
         queries[str(file)[4:-4]] = f.read()
 
 
-async def get_pg_connection(request: Request):
-    pool = request.app.state.db_pool
+async def get_pg_pool(request: Request):
+    return request.app.state.db_pool
+
+
+async def get_pg_connection(pool: Annotated[asyncpg.Pool, Depends(get_pg_pool)]):
     async with pool.acquire() as cnn:
         yield cnn
 

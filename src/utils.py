@@ -31,7 +31,11 @@ class Injector(BaseModel):
     overrides: dict = Field(default_factory=dict)
     cached: dict = Field(default_factory=dict)
 
-    def get[T](self, dependency: Type[T]) -> T:
+    def get[T](self, dependency: type[T]) -> T:
+
+        if dependency == Injector:
+            return self  # type: ignore
+
         if self.cached.get(dependency) is not None:
             return self.cached[dependency]
 

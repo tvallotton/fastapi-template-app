@@ -46,10 +46,12 @@ async def send_login_link(r: Request, form: LoginForm, service: UserService):
 
 @router.post("/signup")
 async def send_signup_link(r: Request, form: LoginForm, service: UserService):
+    print("/signup")
     if await service.user_exists(form.email):
+        print("/signup error")
         cx = {"error": f'The email "{form.email}" is already registered.'}
         return render("user/signup.html", r, cx)
-
+    print("/send access link")
     await service.send_access_link(form.email, form.next)
     return RedirectResponse(f"/user/sent", status_code=303)
 

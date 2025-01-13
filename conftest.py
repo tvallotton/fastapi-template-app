@@ -1,4 +1,7 @@
+import asyncio
 import os
+import threading
+import time
 from urllib.parse import urlparse, urlunparse
 from uuid import uuid4
 
@@ -11,7 +14,10 @@ from fastapi.testclient import TestClient
 from pytest_asyncio import is_async_test
 
 from src import AppConfig, create_app
-from src.database.service import Connection
+from src.database.service import Connection, get_pg_connection
+from src.queue.cli import QueueConfig, create_pgq
+from src.queue.service import QueueService, queue_service
+from src.queue.tests.queue_service_mock import QueueServiceMock
 from src.test_common import HTMLClient
 from src.utils import Injector
 
@@ -41,7 +47,7 @@ def clear_mailpit(request):
 
 
 @pytest_asyncio.fixture(loop_scope="session", scope="session", autouse=False)
-async def test_database_url(request):
+async def test_database_url():
     name = f"test_{uuid4()}"
     cnn = await asyncpg.connect(os.environ["DATABASE_URL"])
     await cnn.execute(f'create database "{name}" with template test')
@@ -52,28 +58,44 @@ async def test_database_url(request):
 
     yield urlunparse(url)
 
-    await cnn.execute(f'drop database "{name}"')
+    await cnn.execute(f'drop database "{name}" with (force)')
 
 
-@pytest_asyncio.fixture(loop_scope="session")
-async def cnn(test_database_url):
+@pytest_asyncio.fixture(loop_scope="session", scope="session")
+async def asyncpg_cnn(test_database_url):
     cnn = await asyncpg.connect(test_database_url)
-    yield Connection(cnn=cnn)
+    yield cnn
     await cnn.close()
 
 
-@pytest.fixture(scope="function")
-def app(test_database_url):
-    return create_app(AppConfig(DATABASE_URL=test_database_url))
+@pytest_asyncio.fixture(loop_scope="session")
+async def cnn(asyncpg_cnn):
+    return Connection(cnn=asyncpg_cnn)
+
+
+@pytest_asyncio.fixture(loop_scope="session", scope="session")
+async def app(test_database_url):
+    app = create_app(AppConfig(DATABASE_URL=test_database_url))
+    pgq = await create_pgq(QueueConfig(DATABASE_URL=test_database_url))
+
+    task = asyncio.create_task(pgq.run())
+
+    yield app
+
+    async def shutdown():
+        pgq.shutdown.set()
+
+    await asyncio.gather(task, shutdown())
 
 
 @pytest.fixture(scope="function")
 def client(app):
     with TestClient(app) as client:
-        print(app, client)
         yield HTMLClient(client=client)
 
 
 @pytest.fixture(scope="function")
-def injector(cnn):
-    return Injector(overrides={Connection: lambda: cnn})
+def injector(asyncpg_cnn: asyncpg.Connection):
+    return Injector(
+        cached={get_pg_connection: asyncpg_cnn},
+    )

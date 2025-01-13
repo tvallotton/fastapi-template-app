@@ -12,7 +12,9 @@ from src import mail
 from src.database.repository import Repository
 from src.database.service import Connection
 from src.mail.dto import MailOptions
+from src.mail.jobs import EmailJob
 from src.mail.service import MailService
+from src.queue.service import QueueService
 from src.user.models import User
 from src.utils import dependency
 
@@ -22,16 +24,14 @@ DOMAIN = environ["DOMAIN"]
 @dependency()
 class UserService(BaseModel):
     repository: Repository[User]
-    tasks: BackgroundTasks
-    mail: MailService
-
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    queue: QueueService
 
     async def user_exists(self, email: str):
         user = await self.repository.find_one(email=email.lower())
         return user is not None
 
     async def send_access_link(self, email: str, next: str):
+        print("/send to", email)
         token = self._create_token({"email": email}, timedelta(hours=1))
         context = {"link": f"{DOMAIN}/user/access?token={token}&next={next}"}
         opts = MailOptions(
@@ -40,7 +40,7 @@ class UserService(BaseModel):
             subject="Access link",
             context=context,
         )
-        self.tasks.add_task(self.mail.send, opts)
+        await self.queue.push(EmailJob(options=opts))
 
     async def verify_token(self, token: str):
         payload = jwt.decode(token, os.environ["JWT_SECRET_KEY"], algorithms=["HS256"])

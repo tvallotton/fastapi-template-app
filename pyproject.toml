@@ -25,6 +25,9 @@ dependencies = [
 packages = [{include = "src"}]
 
 
+[tool.pyright]
+reportIncompatibleVariableOverride = 'none'
+
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.4"
 httpx = "^0.28.1"

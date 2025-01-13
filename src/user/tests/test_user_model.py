@@ -1,6 +1,5 @@
 import pytest
 
-from conftest import pytest_collection_modifyitems
 from src.database.repository import Repository
 from src.user.models import User
 
