@@ -37,6 +37,15 @@ uvicorn = {extras = ["standard"], version = "^0.34.0"}
 websockets = "^14.1"
 beautifulsoup4 = "^4.12.3"
 ipykernel = "^6.29.5"
+autoflake = "^2.3.1"
+
+
+[tool.autoflake]
+check = true
+recursive = true
+in-place = true
+remove-all-unused-imports = true
+
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

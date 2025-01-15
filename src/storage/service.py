@@ -1,7 +1,6 @@
 import hashlib
 import os
 from io import IOBase
-from uuid import UUID
 
 import aioboto3
 import asyncpg

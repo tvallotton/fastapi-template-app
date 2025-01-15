@@ -23,5 +23,5 @@ async def async_seed():
 
 
 @app.command()
-def main():
+def seed():
     asyncio.run(async_seed())

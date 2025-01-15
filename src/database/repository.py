@@ -68,7 +68,7 @@ class Repository[T: models.BaseModel](BaseModel):
         return self.table_class.table_name()
 
     async def fake(self, **data):
-        from src.faker import fake
+        from src.fake import fake
 
         for field, info in self.table_class.model_fields.items():
             type = info.annotation

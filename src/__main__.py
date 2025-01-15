@@ -38,7 +38,7 @@ def dev():
 app.add_typer(
     database, name="database", help="Commands for migrating for dev and test databases"
 )
-app.add_typer(seeder, name="seed", help="Seeds the dev database")
+app.add_typer(seeder, name="seeder", help="Seeds the dev database")
 
 if __name__ == "__main__":
     app()

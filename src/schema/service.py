@@ -2,7 +2,6 @@
 Service related to querying the database schema.
 """
 
-from typing import Annotated
 
 from fastapi import Depends
 from pydantic import BaseModel, ConfigDict

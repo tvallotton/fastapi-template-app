@@ -1,6 +1,5 @@
-from copyreg import constructor
-from inspect import isasyncgen, isclass
-from typing import Annotated, Callable, Type, get_origin
+from inspect import isclass
+from typing import Annotated, get_origin
 
 from fastapi import Depends, Form, Path, Query, Response
 from pydantic import BaseModel, Field

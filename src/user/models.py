@@ -11,7 +11,7 @@ class User(BaseModel):
 
     @classmethod
     async def fake(cls, cnn: Connection, **data):
-        from src.faker import fake
+        from src.fake import fake
 
         data.setdefault("email", fake.unique.ascii_email())
         return await super(User, cls).fake(cnn, **data)

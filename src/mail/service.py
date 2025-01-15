@@ -1,10 +1,8 @@
 import asyncio
 import ssl
-from dataclasses import dataclass
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from os import environ
-from typing import Annotated, Unpack
 
 import aiosmtplib
 from dotenv import load_dotenv

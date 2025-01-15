@@ -1,1 +1,1 @@
-from . import controller, models, service
+from . import controller, dependencies, models, service

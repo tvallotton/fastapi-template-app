@@ -1,7 +1,6 @@
 import os
 from datetime import UTC, datetime, timedelta
 from os import environ
-from typing import Annotated
 
 import jwt
 from fastapi import BackgroundTasks, Depends

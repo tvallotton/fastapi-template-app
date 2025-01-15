@@ -1,5 +1,3 @@
-import os
-from email import header
 from typing import Annotated
 
 import jwt
