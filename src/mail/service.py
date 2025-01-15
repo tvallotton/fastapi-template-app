@@ -1,3 +1,4 @@
+import asyncio
 import ssl
 from dataclasses import dataclass
 from email.mime.multipart import MIMEMultipart
@@ -7,9 +8,9 @@ from typing import Annotated, Unpack
 
 import aiosmtplib
 from dotenv import load_dotenv
-from fastapi import Depends
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
+from src.environment import PROD_ENV
 from src.mail.dto import MailOptions
 from src.templating import templates
 from src.utils import dependency
@@ -18,26 +19,37 @@ load_dotenv(".env.development")
 context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
 
 
-server = aiosmtplib.SMTP(
-    hostname=environ["SMTP_HOST"],
-    port=int(environ["SMTP_PORT"]),
-    password=environ["SMTP_USER"],
-    username=environ["SMTP_PASS"],
-    tls_context=context,
-    start_tls=environ["SMTP_START_TLS"] == "true",
-    use_tls=environ["SMTP_USE_TLS"] == "true",
-)
+SMTP_HOST = environ["SMTP_HOST"]
+SMTP_PORT = int(environ["SMTP_PORT"])
+SMTP_USER = environ["SMTP_USER"]
+SMTP_PASS = environ["SMTP_PASS"]
+SMTP_START_TLS = environ["SMTP_START_TLS"] == "true"
+SMTP_USE_TLS = environ["SMTP_USE_TLS"] == "true"
+IS_SAFE = SMTP_START_TLS or SMTP_USE_TLS
 
-IS_SAFE = environ["SMTP_START_TLS"] == "true" or environ["SMTP_USE_TLS"] == "true"
-
-assert IS_SAFE or environ["ENV"] != "prod"
+assert IS_SAFE or not PROD_ENV
 
 
 @dependency()
 class MailService(BaseModel):
 
+    def __init__(self):
+        super().__init__()
+        self._lock = asyncio.Lock()
+        self._server = aiosmtplib.SMTP(
+            hostname=SMTP_HOST,
+            port=SMTP_PORT,
+            password=SMTP_USER,
+            username=SMTP_PASS,
+            tls_context=context,
+            start_tls=SMTP_START_TLS,
+            use_tls=SMTP_USE_TLS,
+        )
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     async def send(self, opts: MailOptions):
-        src = opts.src or environ["SMTP_USER"]
+        src = opts.src or SMTP_USER
         message = MIMEMultipart("alternative")
         message["From"] = src
         message["To"] = opts.dest
@@ -50,5 +62,6 @@ class MailService(BaseModel):
 
         message.attach(html)
 
-        async with server:
-            await server.sendmail(src, opts.dest, message.as_bytes())
+        async with self._lock:
+            async with self._server:
+                await self._server.sendmail(src, opts.dest, message.as_bytes())

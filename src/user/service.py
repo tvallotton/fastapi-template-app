@@ -22,8 +22,8 @@ DOMAIN = environ["DOMAIN"]
 @dependency()
 class UserService(BaseModel):
     repository: Repository[User]
-    tasks: BackgroundTasks
-    mail: MailService
+    background_tasks: BackgroundTasks
+    mail_service: MailService
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -40,7 +40,8 @@ class UserService(BaseModel):
             subject="Access link",
             context=context,
         )
-        self.tasks.add_task(self.mail.send, opts)
+
+        self.background_tasks.add_task(self.mail_service.send, opts)
 
     async def verify_token(self, token: str):
         payload = jwt.decode(token, os.environ["JWT_SECRET_KEY"], algorithms=["HS256"])

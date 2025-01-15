@@ -1,8 +1,6 @@
-import asyncio
 import os
 import subprocess
 
-import asyncpg
 import typer
 import uvicorn
 
@@ -27,20 +25,13 @@ def dev():
     Runs the server in development mode.
     """
     os.environ["ENV"] = "dev"
+    # fmt: off
     subprocess.Popen(
-        [
-            "npx",
-            "tailwindcss",
-            "-i",
-            "./static/styles/input.css",
-            "-o",
-            "./static/styles/output.css",
-            "--watch",
-            "-y",
-        ],
+        ["npx", "tailwindcss", "-i", "./static/styles/input.css", "-o", "./static/styles/output.css", "--watch", "-y"],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )
+    # fmt: on
     uvicorn.run("src:app", port=int(os.environ["PORT"]), reload=True)
 
 

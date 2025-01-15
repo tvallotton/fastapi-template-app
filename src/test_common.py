@@ -15,13 +15,13 @@ class HTMLClient(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def _get(self, path, *args, **kwargs):
-        print("GET", path, *args, **kwargs)
+        print(f"GET", path, *args, kwargs or "")
         resp = self.client.get(path, *args, **kwargs)
         print(resp.status_code)
         return BeautifulSoup(resp.text, features="html.parser")
 
     def _post(self, path, *args, **kwargs):
-        print("POST", path, *args, kwargs)
+        print("POST", path, *args, kwargs or "")
         resp = self.client.post(path, *args, **kwargs)
 
         return BeautifulSoup(resp.text, features="html.parser")
@@ -107,7 +107,6 @@ class HTMLClient(BaseModel):
         target.replace_with(replace)
 
     def read_email(self, query: str):
-        print(search_by_email(query))
         messages = search_by_email(query)["messages"]
         assert messages != [], f"No emails were found for query {query}"
 
