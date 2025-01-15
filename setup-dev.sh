@@ -1,13 +1,24 @@
 #!/bin/bash
 
-# create virtualenv if not exists
+# install poetry if it doesn't exist
+if ! command -v poetry; then 
+    if ! command -v pipx; then 
+        brew install pipx
+    fi
+    pipx install poetry
+fi
+
+# install sqlx-cli if it doesn't exist.
+if ! command -v sqlx; then
+    brew install sqlx-cli
+fi
+
+
+# create a virtualenv if one does not exist
 if ! test -d .venv; then 
     python -m venv .venv
-    
     source .venv/bin/activate
-    
-    pip install -r requirements.txt
-    pip install -r requirements-dev.txt
+    poetry install
 else 
     source .venv/bin/activate
 fi
