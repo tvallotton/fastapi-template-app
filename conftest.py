@@ -10,10 +10,10 @@ from dotenv import load_dotenv
 from fastapi.testclient import TestClient
 from pytest_asyncio import is_async_test
 
-from src import AppConfig, create_app
-from src.database.service import Connection, get_pg_connection
-from src.test_common import HTMLClient
-from src.utils import Injector
+from app import AppConfig, create_app
+from app.database.service import Connection, get_pg_connection
+from app.test_common import HTMLClient
+from app.utils import Injector
 
 load_dotenv(".env.development")
 pytest_plugins = ["pytest_asyncio"]
