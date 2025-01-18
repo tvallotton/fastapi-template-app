@@ -3,14 +3,10 @@ import os
 from io import IOBase
 
 import aioboto3
-import asyncpg
-import asyncpg.transaction
 from asyncpg import UniqueViolationError
-from fastapi import UploadFile
 from pydantic import BaseModel
 
 from app.database.repository import Repository
-from app.database.service import Connection
 from app.storage.models import Storage
 
 session = aioboto3.Session(
@@ -48,7 +44,7 @@ class StorageService(BaseModel):
                 async with session.client("s3", endpoint_url=endpoint_url) as s3:  # type: ignore
                     await s3.upload_fileobj(file, bucket, storage.id.hex)
 
-            except UniqueViolationError as e:
+            except UniqueViolationError:
                 await self.repository.rollback(savepoint)
                 storage = await self.repository.find_one(
                     "storage/find_duplicate", storage=storage

@@ -1,5 +1,4 @@
 from app.database.models import BaseModel
-from app.database.service import Connection
 
 
 class User(BaseModel):

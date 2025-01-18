@@ -7,7 +7,6 @@ from pydantic import BaseModel
 
 from app.database import models
 from app.database.repository import Repository
-from app.utils import dependency
 
 
 class Factory[T: models.BaseModel](BaseModel):

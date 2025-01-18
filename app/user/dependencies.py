@@ -5,8 +5,7 @@ from typing import Annotated
 
 import jwt
 from fastapi import Depends, HTTPException, Request
-from fastapi.responses import RedirectResponse
-from pydantic import UUID4, BaseModel, Field
+from pydantic import BaseModel
 
 JWT_SECRET_KEY = environ["JWT_SECRET_KEY"]
 

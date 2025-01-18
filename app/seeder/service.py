@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 
-from app import create_app
 from app.database.repository import Repository
 from app.user.models import User
 from app.utils import dependency

@@ -1,8 +1,6 @@
-import logging
 
 from rich.console import Console
 from rich.highlighter import RegexHighlighter
-from rich.logging import RichHandler
 from rich.theme import Theme
 
 from app.environment import LOG_LEVEL

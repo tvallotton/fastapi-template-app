@@ -1,10 +1,6 @@
 import pytest
-from fastapi import BackgroundTasks
-from pytest import fixture
 
 from app.database.repository import Repository
-from app.database.service import Connection
-from app.mail.service import MailService
 from app.test_common import HTMLClient
 from app.user.models import User
 from app.user.service import UserService

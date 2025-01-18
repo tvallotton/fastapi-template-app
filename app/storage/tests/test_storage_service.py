@@ -2,13 +2,7 @@ import io
 
 import httpx
 import pytest
-from asyncpg import UniqueViolationError
-from fastapi import UploadFile
 
-from app import storage
-from app.database.repository import Repository
-from app.database.service import Connection
-from app.storage.models import Storage
 from app.storage.service import StorageService
 
 

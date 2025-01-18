@@ -1,6 +1,5 @@
-from datetime import datetime
 from typing import Annotated
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from fastapi import Depends
 from pydantic import BaseModel, ConfigDict

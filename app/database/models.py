@@ -5,7 +5,6 @@ from uuid import UUID, uuid4
 import pydantic
 from pydantic import Field
 
-from app.database.service import Connection
 
 
 class BaseModel(pydantic.BaseModel):

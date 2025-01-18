@@ -41,10 +41,11 @@ autoflake = "^2.3.1"
 
 
 [tool.autoflake]
-check = true
 recursive = true
 in-place = true
 remove-all-unused-imports = true
+remove-unused-variables = true
+ignore-init-module-imports = true
 
 
 

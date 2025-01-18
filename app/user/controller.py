@@ -1,16 +1,12 @@
 from typing import Annotated
 
 import jwt
-from fastapi import APIRouter, BackgroundTasks, Form, Request
+from fastapi import APIRouter, Form, Request
 from fastapi.responses import RedirectResponse
 
-from app.database.service import Connection
 from app.templating.service import render
-from app.user import service
 from app.user.forms import LoginForm
-from app.user.models import User
 from app.user.service import UserService
-from app.utils import redirect
 
 router = APIRouter(prefix="/user")
 

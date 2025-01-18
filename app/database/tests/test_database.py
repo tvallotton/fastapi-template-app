@@ -1,11 +1,10 @@
 import pytest
 import pytest_asyncio
 
-import app.database as db
 from app.database.factory import Factory
 from app.database.models import BaseModel
 from app.database.repository import Repository
-from app.database.service import Connection, get_pg_connection
+from app.database.service import Connection
 
 pytest_plugins = ("pytest_asyncio",)
 

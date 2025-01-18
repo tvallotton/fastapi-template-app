@@ -1,7 +1,6 @@
 from app.database.repository import Repository
 from app.user.factory import UserFactory
 from app.user.models import User
-from app.user.tests.test_user_service import user_repository
 
 
 async def test_user_factory(injector):

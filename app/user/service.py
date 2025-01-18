@@ -3,13 +3,10 @@ from datetime import UTC, datetime, timedelta
 from os import environ
 
 import jwt
-from fastapi import BackgroundTasks, Depends
+from fastapi import BackgroundTasks
 from pydantic import BaseModel, ConfigDict
-from pydantic.dataclasses import dataclass
 
-from app import mail
 from app.database.repository import Repository
-from app.database.service import Connection
 from app.mail.dto import MailOptions
 from app.mail.service import MailService
 from app.user.models import User
