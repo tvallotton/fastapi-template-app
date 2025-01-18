@@ -1,9 +1,11 @@
+import logging
 from pathlib import Path
 from typing import Annotated
 
 import asyncpg
 from fastapi import Depends, Request
 
+from app.database.logger import log_sql
 from app.database.sqlformatter import SQLFormatter
 from app.utils import dependency
 
@@ -31,26 +33,32 @@ class Connection:
 
     def fetch(self, path: str, *args, **kwargs):
         query = self.formatter.format(queries[path], *args, **kwargs)
+        log_sql(query)
         return self.cnn.fetch(query)
 
     def fetchrow(self, path: str, *args, **kwargs):
         query = self.formatter.format(queries[path], *args, **kwargs)
+        log_sql(query)
         return self.cnn.fetchrow(query)
 
     def execute(self, path: str, *args, **kwargs):
         query = self.formatter.format(queries[path], *args, **kwargs)
+        log_sql(query)
         return self.cnn.execute(query)
 
     def cursor(self, path: str, *args, **kwargs):
         query = self.formatter.format(queries[path], *args, **kwargs)
+        log_sql(query)
         return self.cnn.cursor(query)
 
     def rollback(self, savepoint: str):
         query = self.formatter.format(queries["database/rollback"], savepoint=savepoint)
+        log_sql(query)
         return self.cnn.execute(query)
 
     def savepoint(self, name: str):
         query = self.formatter.format(queries["database/savepoint"], savepoint=name)
+        log_sql(query)
         return self.cnn.execute(query)
 
     async def column_names(self, data: list, query: str):

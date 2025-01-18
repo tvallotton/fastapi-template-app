@@ -5,6 +5,7 @@ import typer
 import uvicorn
 
 from app.database.cli import app as database
+from app.environment import LOG_LEVEL
 from app.seeder.cli import app as seeder
 
 app = typer.Typer(no_args_is_help=True)
@@ -16,7 +17,12 @@ def prod():
     Runs the server in production mode.
     """
     os.environ["ENV"] = "prod"
-    uvicorn.run("app:app", host="0.0.0.0", port=int(os.environ["PORT"]))
+    uvicorn.run(
+        "app:app",
+        host="0.0.0.0",
+        port=int(os.environ["PORT"]),
+        log_level=LOG_LEVEL.lower(),
+    )
 
 
 @app.command()
@@ -32,7 +38,12 @@ def dev():
         stderr=subprocess.DEVNULL,
     )
     # fmt: on
-    uvicorn.run("app:app", port=int(os.environ["PORT"]), reload=True)
+    uvicorn.run(
+        "app:app",
+        port=int(os.environ["PORT"]),
+        reload=True,
+        log_level=LOG_LEVEL.lower(),
+    )
 
 
 app.add_typer(
