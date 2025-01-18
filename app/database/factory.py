@@ -11,7 +11,7 @@ from app.database.repository import Repository
 
 class Factory[T: models.BaseModel](BaseModel):
     repository: Repository[T]
-    table_class: type
+    table_class: type[T]
 
     def __class_getitem__(cls, model_type: type):  # type: ignore
 
@@ -20,7 +20,7 @@ class Factory[T: models.BaseModel](BaseModel):
 
         return Annotated[Factory, Depends(factory)]
 
-    async def create(self, **data):
+    async def create(self, **data) -> T:
         from app.fake import fake
 
         for field, info in self.table_class.model_fields.items():

@@ -9,6 +9,10 @@ from pydantic import BaseModel, ConfigDict
 from app.database.repository import Repository
 from app.mail.dto import MailOptions
 from app.mail.service import MailService
+from app.user.exceptions import (
+    EmailAlreadyRegisteredException,
+    UnregisteredEmailException,
+)
 from app.user.models import User
 from app.utils import dependency
 
@@ -22,6 +26,17 @@ class UserService(BaseModel):
     mail_service: MailService
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    async def send_login_link(self, email: str, next: str):
+        if not await self.user_exists(email):
+            raise UnregisteredEmailException()
+
+        await self.send_access_link(email, next)
+
+    async def send_signup_link(self, email: str, next: str):
+        if await self.user_exists(email):
+            raise EmailAlreadyRegisteredException()
+        return self.send_access_link(email, next)
 
     async def user_exists(self, email: str):
         user = await self.repository.find_one(email=email.lower())
@@ -57,4 +72,5 @@ class UserService(BaseModel):
 
     def _create_token(self, payload: dict, exp=timedelta(days=2)):
         payload["exp"] = datetime.now(UTC) + exp
+        return jwt.encode(payload, environ["JWT_SECRET_KEY"], algorithm="HS256")
         return jwt.encode(payload, environ["JWT_SECRET_KEY"], algorithm="HS256")

@@ -5,6 +5,10 @@ from fastapi import APIRouter, Form, Request
 from fastapi.responses import RedirectResponse
 
 from app.templating.service import render
+from app.user.exceptions import (
+    EmailAlreadyRegisteredException,
+    UnregisteredEmailException,
+)
 from app.user.forms import LoginForm
 from app.user.service import UserService
 
@@ -30,21 +34,22 @@ def sent(r: Request):
 
 @router.post("/login")
 async def send_login_link(r: Request, form: LoginForm, service: UserService):
-    if not await service.user_exists(form.email):
+    try:
+        await service.send_login_link(form.email, form.next)
+        return RedirectResponse(f"/user/sent", status_code=303)
+    except UnregisteredEmailException:
         cx = {"error": f'The email "{form.email}" is not registered.'}
         return render("user/login.html", r, cx)
-
-    await service.send_access_link(form.email, form.next)
-    return RedirectResponse(f"/user/sent", status_code=303)
 
 
 @router.post("/signup")
 async def send_signup_link(r: Request, form: LoginForm, service: UserService):
-    if await service.user_exists(form.email):
+    try:
+        await service.send_signup_link(form.email, form.next)
+        return RedirectResponse(f"/user/sent", status_code=303)
+    except EmailAlreadyRegisteredException:
         cx = {"error": f'The email "{form.email}" is already registered.'}
         return render("user/signup.html", r, cx)
-    await service.send_access_link(form.email, form.next)
-    return RedirectResponse(f"/user/sent", status_code=303)
 
 
 @router.get("/access")
