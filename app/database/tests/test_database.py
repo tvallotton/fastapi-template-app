@@ -1,6 +1,8 @@
 import pytest
+import pytest_asyncio
 
 import app.database as db
+from app.database.factory import Factory
 from app.database.models import BaseModel
 from app.database.repository import Repository
 from app.database.service import Connection, get_pg_connection
@@ -52,9 +54,22 @@ class Foo(BaseModel):
         return "database/test_table"
 
 
+@pytest_asyncio.fixture(loop_scope="session", scope="function")
+async def test_table(cnn: Connection):
+    await cnn.execute("database/test_table/drop")
+    await cnn.execute("database/test_table/create_table")
+    yield
+    await cnn.execute("database/test_table/drop")
+
+
 @pytest.fixture()
-def foo_repository(injector):
+def foo_repository(injector, test_table):
     return injector.get(Repository[Foo])
+
+
+@pytest.fixture()
+def foo_factory(injector, test_table):
+    return injector.get(Factory[Foo])
 
 
 async def test_field_access(cnn: Connection):
@@ -66,10 +81,7 @@ async def test_field_access(cnn: Connection):
 
 async def test_model_crud(cnn: Connection, foo_repository: Repository[Foo]):
 
-    await cnn.execute("database/test_table/drop")
-    await cnn.execute("database/test_table/create_table")
-
-    record = await foo_repository.fake()
+    record = await foo_repository.save(Foo(field="foo"))
     record2 = await foo_repository.find_one(id=record.id)
 
     assert record == record2
@@ -79,4 +91,9 @@ async def test_model_crud(cnn: Connection, foo_repository: Repository[Foo]):
 
     assert record3 is None
 
-    await cnn.execute("database/test_table/drop")
+
+async def test_foo_factory(foo_repository: Repository[Foo], foo_factory: Factory[Foo]):
+    start = await foo_repository.count()
+    await foo_factory.create()
+    end = await foo_repository.count()
+    assert start + 1 == end

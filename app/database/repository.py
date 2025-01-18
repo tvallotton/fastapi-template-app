@@ -66,25 +66,3 @@ class Repository[T: models.BaseModel](BaseModel):
     @property
     def table_name(self):
         return self.table_class.table_name()
-
-    async def fake(self, **data):
-        from app.fake import fake
-
-        for field, info in self.table_class.model_fields.items():
-            type = info.annotation
-            if field in data:
-                continue
-            if type == str:
-                data[field] = fake.text(max_nb_chars=100)
-            elif type == int:
-                data[field] = fake.random_int()
-            elif type == float:
-                data[field] = fake.pyfloat()
-            elif type == datetime:
-                data[field] = fake.date_time_this_year()
-            elif type == UUID:
-                data[field] = uuid4()
-
-        record = self.table_class(**data)
-        await self.save(record)
-        return record
