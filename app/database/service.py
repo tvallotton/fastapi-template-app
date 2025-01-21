@@ -59,10 +59,3 @@ class Connection:
         query = self.formatter.format(queries["database/savepoint"], savepoint=name)
         log_sql(query)
         return self.cnn.execute(query)
-
-    async def column_names(self, data: list, query: str):
-        if len(data) != 0:
-            return list(data[0].keys())
-
-        stmt = await self.cnn.prepare(query)
-        return [attr.name for attr in stmt.get_attributes()]

@@ -36,7 +36,7 @@ class UserService(BaseModel):
     async def send_signup_link(self, email: str, next: str):
         if await self.user_exists(email):
             raise EmailAlreadyRegisteredException()
-        return self.send_access_link(email, next)
+        return await self.send_access_link(email, next)
 
     async def user_exists(self, email: str):
         user = await self.repository.find_one(email=email.lower())

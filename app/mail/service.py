@@ -47,6 +47,7 @@ class MailService(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     async def send(self, opts: MailOptions):
+        print("send main", opts)
         src = opts.src or SMTP_USER
         message = MIMEMultipart("alternative")
         message["From"] = src
@@ -60,6 +61,5 @@ class MailService(BaseModel):
 
         message.attach(html)
 
-        async with self._lock:
-            async with self._server:
-                await self._server.sendmail(src, opts.dest, message.as_bytes())
+        async with self._server:
+            await self._server.sendmail(src, opts.dest, message.as_bytes())

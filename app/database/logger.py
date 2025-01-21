@@ -1,4 +1,3 @@
-
 from rich.console import Console
 from rich.highlighter import RegexHighlighter
 from rich.theme import Theme
@@ -33,7 +32,7 @@ console = Console(highlighter=SQLHighlighter(), theme=theme)
 
 
 def log_sql(sql):
-    if LOG_LEVEL in ["info", "debug"]:
+    if LOG_LEVEL in ["INFO", "DEBUG"]:
         console.print(
             "[green]INFO[/green][white]:[/white]\t ", sql.replace("\n", "\n\t  ")
         )

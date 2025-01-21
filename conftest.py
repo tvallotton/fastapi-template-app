@@ -30,14 +30,8 @@ def pytest_collection_modifyitems(items):
 
 
 @pytest.fixture(scope="session", autouse=True)
-def clear_mailpit(request):
-
-    def finalizer():
-        httpx.delete(f"{MAILPIT_URL}/messages")
-
+def clear_mailpit():
     httpx.delete(f"{MAILPIT_URL}/messages")
-
-    request.addfinalizer(finalizer)
 
 
 @pytest_asyncio.fixture(loop_scope="session", scope="session", autouse=False)
