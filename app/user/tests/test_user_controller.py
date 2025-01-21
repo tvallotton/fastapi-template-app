@@ -1,7 +1,9 @@
 from app.test_common import HTMLClient
+from app.user.factory import UserFactory
 
 
-def test_signup(client: HTMLClient, email="signup@test.email"):
+def test_signup(client: HTMLClient):
+    email = "signup@test.email"
     client.goto("/user/signup")
     client.write("input", email)
     client.click("button[type='submit']")
@@ -9,8 +11,9 @@ def test_signup(client: HTMLClient, email="signup@test.email"):
     client.click("#verify-link")
 
 
-def test_login(client: HTMLClient, email="login@email.test"):
-    test_signup(client, email)
+async def test_login(client: HTMLClient, injector):
+    email = "login@test.email"
+    await injector.get(UserFactory).create(email=email)
     client.goto("/user/login")
     client.write("input", email)
     client.click("button[type='submit']")
