@@ -7,8 +7,8 @@ from app.storage.service import StorageService
 
 
 @pytest.fixture()
-def storage_service(injector):
-    return injector.get(StorageService)
+def storage_service(resolver):
+    return resolver.get(StorageService)
 
 
 @pytest.mark.filterwarnings("ignore:datetime.datetime.utcnow")

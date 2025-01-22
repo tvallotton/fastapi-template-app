@@ -1,32 +1,13 @@
-from contextlib import AsyncExitStack, asynccontextmanager
 from inspect import isclass
 from typing import Annotated, get_origin
 
-from fastapi import Depends, FastAPI, Form, Path, Query, Response
 from pydantic import BaseModel, Field
 
 
-def redirect(path: str, status=200):
-    return Response(status_code=status, headers={"Hx-Location": path})
-
-
-def create_annotated_decorator(annotation):
-    def decorator(*args, **kwargs):
-        def annotate[T](item: T) -> T:
-            return Annotated[item, annotation(*args, **kwargs)]  # type: ignore
-
-        return annotate
-
-    return decorator
-
-
-dependency = create_annotated_decorator(Depends)
-query = create_annotated_decorator(Query)
-form = create_annotated_decorator(Form)
-path = create_annotated_decorator(Path)
-
-
 class Resolver(BaseModel):
+    """
+    A class to perform dependency resolution outside the context of a fastapi request.
+    """
 
     overrides: dict = Field(default_factory=dict)
     cached: dict = Field(default_factory=dict)
@@ -64,17 +45,3 @@ class Resolver(BaseModel):
 
         self.cached[dependency] = dependency(**kwargs)
         return self.cached[dependency]
-
-
-def app_lifespan(lifespans: list):
-
-    @asynccontextmanager
-    async def _lifespan_manager(app: FastAPI):
-        exit_stack = AsyncExitStack()
-        async with exit_stack:
-            for lifespan in lifespans:
-
-                await exit_stack.enter_async_context(lifespan(app))
-            yield
-
-    return _lifespan_manager

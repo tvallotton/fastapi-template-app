@@ -12,8 +12,8 @@ from pytest_asyncio import is_async_test
 
 from app import AppConfig, create_app
 from app.database.service import Connection, get_pg_connection
+from app.resolver import Resolver
 from app.test_common import HTMLClient
-from app.utils import Injector
 
 load_dotenv(".env.development")
 pytest_plugins = ["pytest_asyncio"]
@@ -73,7 +73,7 @@ def client(app):
 
 
 @pytest.fixture(scope="function")
-def injector(asyncpg_cnn: asyncpg.Connection):
-    return Injector(
+def resolver(asyncpg_cnn: asyncpg.Connection):
+    return Resolver(
         cached={get_pg_connection: asyncpg_cnn},
     )

@@ -6,14 +6,14 @@ import typer
 
 from app.database.service import get_pg_connection
 from app.seeder.service import SeederService
-from app.utils import Injector
+from app.utils import Resolver
 
 app = typer.Typer(no_args_is_help=True)
 
 
 async def get_service(service_type):
     cnn = await asyncpg.connect(os.environ["DATABASE_URL"])
-    return Injector(overrides={get_pg_connection: lambda: cnn}).get(service_type)
+    return Resolver(overrides={get_pg_connection: lambda: cnn}).get(service_type)
 
 
 async def async_seed():

@@ -20,6 +20,7 @@ async def get_pg_pool(request: Request):
 
 
 async def get_pg_connection(pool: Annotated[asyncpg.Pool, Depends(get_pg_pool)]):
+    assert isinstance(pool, asyncpg.Pool)
     async with pool.acquire() as cnn:
         yield cnn
 
@@ -27,6 +28,7 @@ async def get_pg_connection(pool: Annotated[asyncpg.Pool, Depends(get_pg_pool)])
 @dependency()
 class Connection:
     def __init__(self, cnn: Annotated[asyncpg.Connection, Depends(get_pg_connection)]):
+        assert isinstance(cnn, asyncpg.Connection), type(cnn)
         self.cnn = cnn
         self.formatter = SQLFormatter()
 

@@ -11,9 +11,9 @@ def test_signup(client: HTMLClient):
     client.click("#verify-link")
 
 
-async def test_login(client: HTMLClient, injector):
+async def test_login(client: HTMLClient, resolver):
     email = "login@test.email"
-    await injector.get(UserFactory).create(email=email)
+    await resolver.get(UserFactory).create(email=email)
     client.goto("/user/login")
     client.write("input", email)
     client.click("button[type='submit']")

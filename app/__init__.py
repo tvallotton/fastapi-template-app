@@ -4,7 +4,9 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
+from app import cron
 from app.environment import DATABASE_URL, DEV_ENV
+from app.utils import app_lifespan
 
 from . import autoreload, database, home, user
 
@@ -18,7 +20,14 @@ class AppConfig:
 def create_app(config: AppConfig = AppConfig()) -> FastAPI:
     load_dotenv(".env")
 
-    app = FastAPI(lifespan=database.lifespan.setup_database)
+    app = FastAPI(
+        lifespan=app_lifespan(
+            [
+                database.lifespan.setup_database,
+                cron.lifespan.setup_cron,
+            ]
+        )
+    )
 
     app.state.config = config
 

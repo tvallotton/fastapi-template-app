@@ -62,13 +62,13 @@ async def test_table(cnn: Connection):
 
 
 @pytest.fixture()
-def foo_repository(injector, test_table):
-    return injector.get(Repository[Foo])
+def foo_repository(resolver, test_table):
+    return resolver.get(Repository[Foo])
 
 
 @pytest.fixture()
-def foo_factory(injector, test_table):
-    return injector.get(Factory[Foo])
+def foo_factory(resolver, test_table):
+    return resolver.get(Factory[Foo])
 
 
 async def test_field_access(cnn: Connection):

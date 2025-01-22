@@ -7,13 +7,13 @@ from app.user.service import UserService
 
 
 @pytest.fixture(scope="function")
-def user_service(injector):
-    return injector.get(UserService)
+def user_service(resolver):
+    return resolver.get(UserService)
 
 
 @pytest.fixture(scope="function")
-def user_repository(injector):
-    return injector.get(Repository[User])
+def user_repository(resolver):
+    return resolver.get(Repository[User])
 
 
 async def test_user_doesnt_exist(user_service: UserService):
