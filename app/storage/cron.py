@@ -1,5 +1,3 @@
-from calendar import weekday
-
 from app.cron.services import BaseCron, cron
 from app.storage.service import StorageService
 

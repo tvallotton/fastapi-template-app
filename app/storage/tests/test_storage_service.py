@@ -1,5 +1,4 @@
 import io
-from pydoc import resolve
 from uuid import UUID
 
 import httpx
@@ -8,10 +7,7 @@ import pytest_asyncio
 
 from app.database.factory import Factory
 from app.database.models import BaseModel
-from app.database.repository import Repository
 from app.database.service import Connection
-from app.resolver import Resolver
-from app.storage.models import Storage
 from app.storage.service import StorageService
 
 
