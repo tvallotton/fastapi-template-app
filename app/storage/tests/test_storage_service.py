@@ -4,9 +4,11 @@ from uuid import UUID
 
 import httpx
 import pytest
+import pytest_asyncio
 
 from app.database.models import BaseModel
 from app.database.repository import Repository
+from app.database.service import Connection
 from app.resolver import Resolver
 from app.storage.models import Storage
 from app.storage.service import StorageService
@@ -15,6 +17,22 @@ from app.storage.service import StorageService
 @pytest.fixture()
 def storage_service(resolver):
     return resolver.get(StorageService)
+
+
+class ReferenceTable(BaseModel):
+    storage_id: UUID
+
+    @classmethod
+    def model_dir(cls):
+        return "storage/test"
+
+
+@pytest_asyncio.fixture(loop_scope="session")
+async def reference_table_repository(resolver):
+    connection = resolver.get(Connection)
+    await connection.execute("storage/test/create_table")
+    yield resolver.get(Repository[ReferenceTable])
+    await connection.execute("storage/test/drop_table")
 
 
 @pytest.mark.filterwarnings("ignore:datetime.datetime.utcnow")
@@ -72,6 +90,20 @@ async def test_delete_unreferenced_files(
 ):
     buffer = io.BytesIO(b"message to delete")
     storage = await storage_service.upload("test", buffer)
+    await storage_service.delete_unreferenced_files()
+
+    assert await storage_service.repository.find_one(id=storage.id) is None
+
+
+@pytest.mark.filterwarnings("ignore:datetime.datetime.utcnow")
+async def test_not_delete_referenced_files(
+    storage_service: StorageService,
+    reference_table_repository: Repository[ReferenceTable],
+):
+    buffer = io.BytesIO(b"message to delete")
+    storage = await storage_service.upload("test", buffer)
+
+    await reference_table_repository.save(ReferenceTable(storage_id=storage.id))
     await storage_service.delete_unreferenced_files()
 
     assert await storage_service.repository.find_one(id=storage.id) is None
