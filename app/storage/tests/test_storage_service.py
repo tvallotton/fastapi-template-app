@@ -6,6 +6,7 @@ import httpx
 import pytest
 import pytest_asyncio
 
+from app.database.factory import Factory
 from app.database.models import BaseModel
 from app.database.repository import Repository
 from app.database.service import Connection
@@ -28,20 +29,18 @@ class ReferenceTable(BaseModel):
 
 
 @pytest_asyncio.fixture(loop_scope="session")
-async def reference_table_repository(resolver):
+async def reference_table_factory(resolver):
     connection = resolver.get(Connection)
     await connection.execute("storage/test/create_table")
-    yield resolver.get(Repository[ReferenceTable])
+    yield resolver.get(Factory[ReferenceTable])
     await connection.execute("storage/test/drop_table")
 
 
-@pytest.mark.filterwarnings("ignore:datetime.datetime.utcnow")
 async def test_upload_new(storage_service: StorageService):
     buffer = io.BytesIO(b"hello world")
     await storage_service.upload("test", buffer)
 
 
-@pytest.mark.filterwarnings("ignore:datetime.datetime.utcnow")
 async def test_upload_duplicate(storage_service: StorageService):
     buffer = io.BytesIO(b"duplicate buffer")
     await storage_service.upload("test", buffer)
@@ -56,7 +55,6 @@ async def test_upload_duplicate(storage_service: StorageService):
         ), "Duplicate control should prevent the file from being uploaded again"
 
 
-@pytest.mark.filterwarnings("ignore:datetime.datetime.utcnow")
 async def test_presigned_url(storage_service: StorageService):
     message = "presigned buffer"
     buffer = io.BytesIO(bytes(message, "utf-8"))
@@ -65,7 +63,6 @@ async def test_presigned_url(storage_service: StorageService):
     assert message in httpx.get(url).text
 
 
-@pytest.mark.filterwarnings("ignore:datetime.datetime.utcnow")
 async def test_delete(storage_service: StorageService):
     buffer = io.BytesIO(b"message to delete")
     storage = await storage_service.upload("test", buffer)
@@ -76,18 +73,23 @@ async def test_delete(storage_service: StorageService):
     assert httpx.get(url).status_code == 404
 
 
-@pytest.mark.filterwarnings("ignore:datetime.datetime.utcnow")
 async def test_has_no_references(storage_service: StorageService):
-    buffer = io.BytesIO(b"message to delete")
+    buffer = io.BytesIO(b"message without references")
     storage = await storage_service.upload("test", buffer)
-    assert isinstance(storage, Storage)
     assert not await storage_service.has_references(storage)
 
 
-@pytest.mark.filterwarnings("ignore:datetime.datetime.utcnow")
-async def test_delete_unreferenced_files(
-    storage_service: StorageService, resolver: Resolver
+async def test_has_references(
+    storage_service: StorageService,
+    reference_table_factory: Factory[ReferenceTable],
 ):
+    buffer = io.BytesIO(b"message with references")
+    storage = await storage_service.upload("test", buffer)
+    await reference_table_factory.create(storage_id=storage.id)
+    assert await storage_service.has_references(storage)
+
+
+async def test_delete_unreferenced_files(storage_service: StorageService):
     buffer = io.BytesIO(b"message to delete")
     storage = await storage_service.upload("test", buffer)
     await storage_service.delete_unreferenced_files()
@@ -95,15 +97,13 @@ async def test_delete_unreferenced_files(
     assert await storage_service.repository.find_one(id=storage.id) is None
 
 
-@pytest.mark.filterwarnings("ignore:datetime.datetime.utcnow")
 async def test_not_delete_referenced_files(
     storage_service: StorageService,
-    reference_table_repository: Repository[ReferenceTable],
+    reference_table_factory: Factory[ReferenceTable],
 ):
-    buffer = io.BytesIO(b"message to delete")
+    buffer = io.BytesIO(b"message to keep")
     storage = await storage_service.upload("test", buffer)
 
-    await reference_table_repository.save(ReferenceTable(storage_id=storage.id))
+    await reference_table_factory.create(storage_id=storage.id)
     await storage_service.delete_unreferenced_files()
-
-    assert await storage_service.repository.find_one(id=storage.id) is None
+    assert await storage_service.repository.find_one(id=storage.id) is not None
