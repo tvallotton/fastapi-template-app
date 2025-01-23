@@ -5,8 +5,8 @@ import asyncpg
 import typer
 
 from app.database.service import get_pg_connection
+from app.resolver import Resolver
 from app.seeder.service import SeederService
-from app.utils import Resolver
 
 app = typer.Typer(no_args_is_help=True)
 

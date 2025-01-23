@@ -1,8 +1,14 @@
 import io
+from pydoc import resolve
+from uuid import UUID
 
 import httpx
 import pytest
 
+from app.database.models import BaseModel
+from app.database.repository import Repository
+from app.resolver import Resolver
+from app.storage.models import Storage
 from app.storage.service import StorageService
 
 
@@ -50,3 +56,22 @@ async def test_delete(storage_service: StorageService):
 
     await storage_service.delete(storage)
     assert httpx.get(url).status_code == 404
+
+
+@pytest.mark.filterwarnings("ignore:datetime.datetime.utcnow")
+async def test_has_no_references(storage_service: StorageService):
+    buffer = io.BytesIO(b"message to delete")
+    storage = await storage_service.upload("test", buffer)
+    assert isinstance(storage, Storage)
+    assert not await storage_service.has_references(storage)
+
+
+@pytest.mark.filterwarnings("ignore:datetime.datetime.utcnow")
+async def test_delete_unreferenced_files(
+    storage_service: StorageService, resolver: Resolver
+):
+    buffer = io.BytesIO(b"message to delete")
+    storage = await storage_service.upload("test", buffer)
+    await storage_service.delete_unreferenced_files()
+
+    assert await storage_service.repository.find_one(id=storage.id) is None

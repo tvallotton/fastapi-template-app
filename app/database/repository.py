@@ -27,17 +27,18 @@ class Repository[T: models.BaseModel](BaseModel):
         if record is not None:
             return self.table_class(**record)
 
-    async def find(self, path=None, **where) -> list[T]:
-        records = await self.cnn.fetch(path or f"{self.model_dir}/find", **where)
-        return [self.table_class(**record) for record in records]
+    async def find(self, path=None, **where):
+        cursor = self.cnn.cursor(path or f"{self.model_dir}/find", **where)
+        async for record in cursor:
+            yield self.table_class(**record)
 
     async def delete(self, id: str | UUID):
         dir = self.model_dir
         await self.cnn.execute(f"{dir}/delete", id=id)
 
-    async def count(self) -> int:
+    async def count(self, path=None, **kwargs) -> int:
         dir = self.model_dir
-        row = await self.cnn.fetchrow(f"{dir}/count")
+        row = await self.cnn.fetchrow(path or f"{dir}/count", **kwargs)
         assert row is not None
         return row["count"]
 

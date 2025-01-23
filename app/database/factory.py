@@ -37,6 +37,8 @@ class Factory[T: models.BaseModel](BaseModel):
                 data[field] = fake.date_time_this_year()
             elif type == UUID:
                 data[field] = uuid4()
+            elif type == bytes:
+                data[field] = fake.binary(128)
 
         record = self.table_class(**data)
         await self.repository.save(record)

@@ -1,12 +1,14 @@
 import hashlib
 import os
 from io import IOBase
+from uuid import UUID
 
 import aioboto3
 from asyncpg import UniqueViolationError
 from pydantic import BaseModel
 
 from app.database.repository import Repository
+from app.schema.service import SchemaService
 from app.storage.models import Storage
 
 session = aioboto3.Session(
@@ -21,6 +23,7 @@ BUF_SIZE = 8 * 1028
 
 class StorageService(BaseModel):
     repository: Repository[Storage]
+    schema_service: SchemaService
 
     async def presigned_url(self, storage: Storage):
         async with session.client("s3", endpoint_url=endpoint_url) as s3:  # type: ignore
@@ -70,3 +73,28 @@ class StorageService(BaseModel):
             sha1.update(data)
         file.seek(0)
         return sha1.digest()
+
+    async def delete_unreferenced_files(self):
+        """Deletes all files which are not referenced by at least one record with a foreign key."""
+        async with self.repository.transaction():
+            async for storage in self.repository.find():
+                if await self.has_references(storage):
+                    continue
+                else:
+                    await self.delete(storage)
+
+    async def has_references(self, storage: Storage):
+        """
+        Returns weather there are any foreign key references to this record.
+        """
+        references = await self.schema_service.get_table_references("storage")
+
+        for column in references:
+            for reference in references[column]:
+                count = await self.repository.count(
+                    "storage/count-references", id=storage.id, **reference.model_dump()
+                )
+                if count != 0:
+                    return True
+
+        return False
