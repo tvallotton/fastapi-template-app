@@ -1,11 +1,17 @@
--- Add up migration script here
 
-create view suggestion as (
-    select distinct on (street, number) *, 
+-- we use a materialized view because 
+-- I couldn't get postgres to index use the 
+-- gist index on a regular view
+create materialized view suggestion as (
+    select distinct on (street, number)
+        id,
+        city_id,
+        street,
+        number,
         geo.st_y(geometry) as latitude,
         geo.st_x(geometry) as longitude,
         (case when "number" is not null then street || ' ' || "number" else  street end) as address
     from place
 );
 
-create index place_address_idx on place using gin ((case when "number" is not null then street || ' ' || "number" else  street end) gin_trgm_ops);
+create index suggestion_address on suggestion using gist (address gist_trgm_ops);
