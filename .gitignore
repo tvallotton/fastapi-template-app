@@ -4,3 +4,5 @@ static/styles/output.css
 pyrightconfig.json
 .DS_Store
 .env.local
+.osm.pbf
+source.geojson

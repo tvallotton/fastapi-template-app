@@ -1,2 +1,3 @@
 -- Add migration script here
-create extension postgis;
+create schema geo;
+create extension postgis with schema geo;

@@ -23,6 +23,9 @@ class SQLFormatter(Formatter):
         return super().format_field(value, "")
 
     def escape_value(self, expr):
+        if expr is None:
+            return "NULL"
+
         if isinstance(expr, list):
             return self.escape_array(expr)
         if isinstance(expr, bytes):

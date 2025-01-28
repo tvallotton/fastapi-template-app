@@ -11,9 +11,9 @@ class SQLHighlighter(RegexHighlighter):
         r"(?P<symbol>[^\w])",
         r"(?P<identifier>\w+)",
         r'(?P<identifier>"[^"]+")',
-        r"(?P<literal>'[^']+')",
+        r"(?P<literal>'[^']*')",
         r"(?:[^\w]|^)(?P<keyword>"
-        r"select|values|insert into|returning|on conflict|and|or|not|create"
+        r"select|with|as|null|values|insert into|returning|on conflict|and|or|not|create|desc|limit"
         r"|drop|delete|default|in|from|on|join|inner|left|right|update|set"
         r"|where|having|order by)(?:[^\w]|$)",
     ]

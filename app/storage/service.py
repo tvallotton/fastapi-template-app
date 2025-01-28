@@ -48,9 +48,7 @@ class StorageService(BaseModel):
 
             except UniqueViolationError:
                 await self.repository.rollback(savepoint)
-                storage = await self.repository.find_one(
-                    "storage/find_duplicate", storage=storage
-                )
+                storage = await self.repository.find_one("duplicate", storage=storage)
                 assert storage is not None
                 return storage
 
@@ -91,7 +89,7 @@ class StorageService(BaseModel):
         for column in references:
             for reference in references[column]:
                 count = await self.repository.count(
-                    "storage/count-references", id=storage.id, **reference.model_dump()
+                    "references", id=storage.id, **reference.model_dump()
                 )
                 if count != 0:
                     return True
