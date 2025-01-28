@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 from pydantic import BaseModel
 
 from app.database.repository import Repository

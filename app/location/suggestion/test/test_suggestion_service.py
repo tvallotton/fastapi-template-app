@@ -1,5 +1,3 @@
-from app.database.factory import Factory
-from app.database.repository import Repository
 from app.location.place.factory import PlaceFactory
 from app.location.suggestion.service import SuggestionService
 

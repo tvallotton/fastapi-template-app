@@ -1,16 +1,12 @@
 import re
-from datetime import datetime
 from uuid import UUID, uuid4
 
 import pydantic
 from pydantic import Field
 
 
-
 class BaseModel(pydantic.BaseModel):
     id: UUID = Field(default_factory=uuid4)
-    valid_since: datetime | None = None
-    valid_until: datetime | None = None
 
     @classmethod
     def model_dir(cls):
