@@ -22,23 +22,31 @@ class Repository[T: models.BaseModel](BaseModel):
 
         return Annotated[Repository, Depends(get_repository)]
 
-    async def find_one(self, path=None, **where) -> T | None:
-        record = await self.cnn.fetchrow(path or f"{self.model_dir}/find_one", **where)
+    async def find_one(self, query="", **where) -> T | None:
+        path = self.query_path("find_one", query)
+        record = await self.cnn.fetchrow(path, **where)
         if record is not None:
             return self.table_class(**record)
 
-    async def find(self, path=None, **where):
-        cursor = self.cnn.cursor(path or f"{self.model_dir}/find", **where)
+    async def find(self, query="", **where):
+        path = self.query_path("find", query)
+        cursor = self.cnn.cursor(path, **where)
         async for record in cursor:
             yield self.table_class(**record)
 
     async def delete(self, id: str | UUID):
-        dir = self.model_dir
-        await self.cnn.execute(f"{dir}/delete", id=id)
+        path = self.query_path("delete", "")
+        await self.cnn.execute(path, id=id)
 
-    async def count(self, path=None, **kwargs) -> int:
-        dir = self.model_dir
-        row = await self.cnn.fetchrow(path or f"{dir}/count", **kwargs)
+    def query_path(self, prefix: str, query: str = ""):
+        if query != "":
+            return f"{self.model_dir}/{prefix}_{query}"
+        else:
+            return f"{self.model_dir}/{prefix}"
+
+    async def count(self, query="", **kwargs) -> int:
+        path = self.query_path("count", query)
+        row = await self.cnn.fetchrow(path, **kwargs)
         assert row is not None
         return row["count"]
 

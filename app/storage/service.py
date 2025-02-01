@@ -48,9 +48,7 @@ class StorageService(BaseModel):
 
             except UniqueViolationError:
                 await self.repository.rollback(savepoint)
-                storage = await self.repository.find_one(
-                    "storage/find_duplicate", storage=storage
-                )
+                storage = await self.repository.find_one("duplicate", storage=storage)
                 assert storage is not None
                 return storage
 
